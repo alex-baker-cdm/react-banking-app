@@ -1,0 +1,191 @@
+name: Devin UI Test
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  devin-ui-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Trigger Devin Session
+        id: trigger-devin
+        env:
+          DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+        run: |
+          STRUCTURED_OUTPUT_SCHEMA=$(cat <<'EOF'
+          {
+            "type": "object",
+            "properties": {
+              "test_passed": {
+                "type": "boolean",
+                "description": "Whether all UI tests passed"
+              },
+              "pages_tested": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "page": {
+                      "type": "string",
+                      "description": "Name of the page tested"
+                    },
+                    "route": {
+                      "type": "string",
+                      "description": "Route path of the page"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["pass", "fail"],
+                      "description": "Test result for this page"
+                    },
+                    "notes": {
+                      "type": "string",
+                      "description": "Any notes or issues found"
+                    }
+                  },
+                  "required": ["page", "route", "status"]
+                },
+                "description": "List of pages tested with their results"
+              },
+              "summary": {
+                "type": "string",
+                "description": "Overall summary of the test results"
+              }
+            },
+            "required": ["test_passed", "pages_tested", "summary"]
+          }
+          EOF
+          )
+
+          PROMPT=$(cat <<'EOF'
+          Test the core user flow of this React banking application. Please:
+
+          1. Start the development server with `yarn start`
+          2. Navigate through the following pages and verify they render correctly:
+             - Sign in page (/) - Enter email and password, click Sign in
+             - Home page (/home) - Verify balance display and navigation
+             - Transactions page (/transactions) - Verify transaction list
+             - Cards page (/cards) - Verify card display
+             - Add money page (/add) - Verify add money form
+             - Profile page (/profile) - Verify profile information
+             - Savings page (/savings) - Verify savings display
+
+          3. For each page, verify:
+             - The page loads without errors
+             - Key UI elements are visible
+             - Navigation between pages works
+
+          4. Update the structured output with your test results. Set test_passed to true only if ALL pages render correctly and navigation works.
+          EOF
+          )
+
+          RESPONSE=$(curl -s -X POST "https://api.devin.ai/v1/sessions" \
+            -H "Authorization: Bearer $DEVIN_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg prompt "$PROMPT" \
+              --argjson schema "$STRUCTURED_OUTPUT_SCHEMA" \
+              '{
+                prompt: $prompt,
+                structured_output_schema: $schema,
+                idempotent: false
+              }')")
+
+          SESSION_ID=$(echo "$RESPONSE" | jq -r '.session_id')
+
+          if [ -z "$SESSION_ID" ] || [ "$SESSION_ID" = "null" ]; then
+            echo "Failed to create Devin session"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+
+          echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
+          echo "Created Devin session: $SESSION_ID"
+          echo "Session URL: https://app.devin.ai/sessions/$SESSION_ID"
+
+      - name: Wait for Devin Session to Complete
+        id: wait-devin
+        env:
+          DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+          SESSION_ID: ${{ steps.trigger-devin.outputs.session_id }}
+        run: |
+          echo "Waiting for Devin session to complete..."
+          echo "Session URL: https://app.devin.ai/sessions/$SESSION_ID"
+
+          MAX_ATTEMPTS=60
+          POLL_INTERVAL=30
+
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            RESPONSE=$(curl -s -X GET "https://api.devin.ai/v1/sessions/$SESSION_ID" \
+              -H "Authorization: Bearer $DEVIN_API_KEY")
+
+            STATUS=$(echo "$RESPONSE" | jq -r '.status_enum')
+            echo "Attempt $i/$MAX_ATTEMPTS: Status = $STATUS"
+
+            if [ "$STATUS" = "finished" ]; then
+              echo "Session completed successfully"
+              STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -r '.structured_output // empty')
+              echo "structured_output<<EOF" >> $GITHUB_OUTPUT
+              echo "$STRUCTURED_OUTPUT" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+              break
+            elif [ "$STATUS" = "blocked" ] || [ "$STATUS" = "expired" ]; then
+              echo "Session ended with status: $STATUS"
+              STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -r '.structured_output // empty')
+              echo "structured_output<<EOF" >> $GITHUB_OUTPUT
+              echo "$STRUCTURED_OUTPUT" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+              break
+            fi
+
+            sleep $POLL_INTERVAL
+          done
+
+          if [ "$STATUS" != "finished" ] && [ "$STATUS" != "blocked" ] && [ "$STATUS" != "expired" ]; then
+            echo "Session did not complete within the timeout period"
+            exit 1
+          fi
+
+      - name: Evaluate Test Results
+        env:
+          STRUCTURED_OUTPUT: ${{ steps.wait-devin.outputs.structured_output }}
+          SESSION_ID: ${{ steps.trigger-devin.outputs.session_id }}
+        run: |
+          echo "Devin Session: https://app.devin.ai/sessions/$SESSION_ID"
+          echo ""
+          echo "Structured Output:"
+          echo "$STRUCTURED_OUTPUT" | jq . 2>/dev/null || echo "$STRUCTURED_OUTPUT"
+          echo ""
+
+          if [ -z "$STRUCTURED_OUTPUT" ]; then
+            echo "No structured output received from Devin session"
+            exit 1
+          fi
+
+          TEST_PASSED=$(echo "$STRUCTURED_OUTPUT" | jq -r '.test_passed // false')
+          SUMMARY=$(echo "$STRUCTURED_OUTPUT" | jq -r '.summary // "No summary provided"')
+
+          echo "Test Passed: $TEST_PASSED"
+          echo "Summary: $SUMMARY"
+          echo ""
+
+          echo "Pages Tested:"
+          echo "$STRUCTURED_OUTPUT" | jq -r '.pages_tested[]? | "  - \(.page) (\(.route)): \(.status)\(.notes | if . then " - " + . else "" end)"' 2>/dev/null || true
+
+          if [ "$TEST_PASSED" != "true" ]; then
+            echo ""
+            echo "UI tests failed. See the Devin session for details."
+            exit 1
+          fi
+
+          echo ""
+          echo "All UI tests passed!"
