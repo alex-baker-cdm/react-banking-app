@@ -109,23 +109,26 @@ jobs:
           POLL_INTERVAL=30
 
           for i in $(seq 1 $MAX_ATTEMPTS); do
-            RESPONSE=$(curl -s -X GET "https://api.devin.ai/v3beta1/organizations/$DEVIN_ORG_ID/sessions/$SESSION_ID" \
+            # Use List Sessions endpoint and filter by session_id (Get Session returns Unauthorized for service users)
+            RESPONSE=$(curl -s -X GET "https://api.devin.ai/v3beta1/organizations/$DEVIN_ORG_ID/sessions" \
               -H "Authorization: Bearer $DEVIN_API_KEY")
 
-            STATUS=$(echo "$RESPONSE" | jq -r '.status')
+            # Find the session by ID in the list
+            SESSION_DATA=$(echo "$RESPONSE" | jq --arg sid "$SESSION_ID" '.items[] | select(.session_id == $sid)')
+            STATUS=$(echo "$SESSION_DATA" | jq -r '.status // "unknown"')
             echo "Attempt $i/$MAX_ATTEMPTS: Status = $STATUS"
 
             # v3 API status values: new, claimed, running, exit, error, suspended, resuming
             if [ "$STATUS" = "suspended" ] || [ "$STATUS" = "exit" ]; then
               echo "Session completed with status: $STATUS"
-              STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -r '.structured_output // empty')
+              STRUCTURED_OUTPUT=$(echo "$SESSION_DATA" | jq -r '.structured_output // empty')
               echo "structured_output<<EOF" >> $GITHUB_OUTPUT
               echo "$STRUCTURED_OUTPUT" >> $GITHUB_OUTPUT
               echo "EOF" >> $GITHUB_OUTPUT
               break
             elif [ "$STATUS" = "error" ]; then
               echo "Session ended with error"
-              STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -r '.structured_output // empty')
+              STRUCTURED_OUTPUT=$(echo "$SESSION_DATA" | jq -r '.structured_output // empty')
               echo "structured_output<<EOF" >> $GITHUB_OUTPUT
               echo "$STRUCTURED_OUTPUT" >> $GITHUB_OUTPUT
               echo "EOF" >> $GITHUB_OUTPUT
