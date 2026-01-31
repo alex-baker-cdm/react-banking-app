@@ -20,52 +20,8 @@ jobs:
         id: trigger-devin
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+          DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
         run: |
-          STRUCTURED_OUTPUT_SCHEMA=$(cat <<'EOF'
-          {
-            "type": "object",
-            "properties": {
-              "test_passed": {
-                "type": "boolean",
-                "description": "Whether all UI tests passed"
-              },
-              "pages_tested": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "page": {
-                      "type": "string",
-                      "description": "Name of the page tested"
-                    },
-                    "route": {
-                      "type": "string",
-                      "description": "Route path of the page"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": ["pass", "fail"],
-                      "description": "Test result for this page"
-                    },
-                    "notes": {
-                      "type": "string",
-                      "description": "Any notes or issues found"
-                    }
-                  },
-                  "required": ["page", "route", "status"]
-                },
-                "description": "List of pages tested with their results"
-              },
-              "summary": {
-                "type": "string",
-                "description": "Overall summary of the test results"
-              }
-            },
-            "required": ["test_passed", "pages_tested", "summary"]
-          }
-          EOF
-          )
-
           PROMPT=$(cat <<'EOF'
           Test the core user flow of this React banking application. Please:
 
@@ -84,20 +40,47 @@ jobs:
              - Key UI elements are visible
              - Navigation between pages works
 
-          4. Update the structured output with your test results. Set test_passed to true only if ALL pages render correctly and navigation works.
+          4. Update the structured output with your test results using this JSON schema:
+          {
+            "type": "object",
+            "properties": {
+              "test_passed": {
+                "type": "boolean",
+                "description": "Whether all UI tests passed"
+              },
+              "pages_tested": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "page": { "type": "string", "description": "Name of the page tested" },
+                    "route": { "type": "string", "description": "Route path of the page" },
+                    "status": { "type": "string", "enum": ["pass", "fail"], "description": "Test result for this page" },
+                    "notes": { "type": "string", "description": "Any notes or issues found" }
+                  },
+                  "required": ["page", "route", "status"]
+                },
+                "description": "List of pages tested with their results"
+              },
+              "summary": {
+                "type": "string",
+                "description": "Overall summary of the test results"
+              }
+            },
+            "required": ["test_passed", "pages_tested", "summary"]
+          }
+
+          Set test_passed to true only if ALL pages render correctly and navigation works.
           EOF
           )
 
-          RESPONSE=$(curl -s -X POST "https://api.devin.ai/v1/sessions" \
+          RESPONSE=$(curl -s -X POST "https://api.devin.ai/v3beta1/organizations/$DEVIN_ORG_ID/sessions" \
             -H "Authorization: Bearer $DEVIN_API_KEY" \
             -H "Content-Type: application/json" \
             -d "$(jq -n \
               --arg prompt "$PROMPT" \
-              --argjson schema "$STRUCTURED_OUTPUT_SCHEMA" \
               '{
-                prompt: $prompt,
-                structured_output_schema: $schema,
-                idempotent: false
+                prompt: $prompt
               }')")
 
           SESSION_ID=$(echo "$RESPONSE" | jq -r '.session_id')
@@ -116,6 +99,7 @@ jobs:
         id: wait-devin
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+          DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
           SESSION_ID: ${{ steps.trigger-devin.outputs.session_id }}
         run: |
           echo "Waiting for Devin session to complete..."
@@ -125,10 +109,10 @@ jobs:
           POLL_INTERVAL=30
 
           for i in $(seq 1 $MAX_ATTEMPTS); do
-            RESPONSE=$(curl -s -X GET "https://api.devin.ai/v1/sessions/$SESSION_ID" \
+            RESPONSE=$(curl -s -X GET "https://api.devin.ai/v3beta1/organizations/$DEVIN_ORG_ID/sessions/$SESSION_ID" \
               -H "Authorization: Bearer $DEVIN_API_KEY")
 
-            STATUS=$(echo "$RESPONSE" | jq -r '.status_enum')
+            STATUS=$(echo "$RESPONSE" | jq -r '.status')
             echo "Attempt $i/$MAX_ATTEMPTS: Status = $STATUS"
 
             if [ "$STATUS" = "finished" ]; then
