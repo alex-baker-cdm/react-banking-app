@@ -115,15 +115,16 @@ jobs:
             STATUS=$(echo "$RESPONSE" | jq -r '.status')
             echo "Attempt $i/$MAX_ATTEMPTS: Status = $STATUS"
 
-            if [ "$STATUS" = "finished" ]; then
-              echo "Session completed successfully"
+            # v3 API status values: new, claimed, running, exit, error, suspended, resuming
+            if [ "$STATUS" = "suspended" ] || [ "$STATUS" = "exit" ]; then
+              echo "Session completed with status: $STATUS"
               STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -r '.structured_output // empty')
               echo "structured_output<<EOF" >> $GITHUB_OUTPUT
               echo "$STRUCTURED_OUTPUT" >> $GITHUB_OUTPUT
               echo "EOF" >> $GITHUB_OUTPUT
               break
-            elif [ "$STATUS" = "blocked" ] || [ "$STATUS" = "expired" ]; then
-              echo "Session ended with status: $STATUS"
+            elif [ "$STATUS" = "error" ]; then
+              echo "Session ended with error"
               STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -r '.structured_output // empty')
               echo "structured_output<<EOF" >> $GITHUB_OUTPUT
               echo "$STRUCTURED_OUTPUT" >> $GITHUB_OUTPUT
@@ -134,7 +135,7 @@ jobs:
             sleep $POLL_INTERVAL
           done
 
-          if [ "$STATUS" != "finished" ] && [ "$STATUS" != "blocked" ] && [ "$STATUS" != "expired" ]; then
+          if [ "$STATUS" != "suspended" ] && [ "$STATUS" != "exit" ] && [ "$STATUS" != "error" ]; then
             echo "Session did not complete within the timeout period"
             exit 1
           fi
