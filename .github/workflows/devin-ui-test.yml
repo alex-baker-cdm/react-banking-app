@@ -61,7 +61,7 @@ jobs:
             STATUS=$(echo "$RESPONSE" | jq -r '.status_enum')
             echo "Attempt $((ATTEMPT+1))/$MAX_ATTEMPTS - Status: $STATUS"
             
-            if [ "$STATUS" == "finished" ] || [ "$STATUS" == "stopped" ] || [ "$STATUS" == "suspended" ]; then
+            if [ "$STATUS" == "finished" ] || [ "$STATUS" == "stopped" ] || [ "$STATUS" == "suspended" ] || [ "$STATUS" == "blocked" ]; then
               echo "Session completed with status: $STATUS"
               
               STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -c '.structured_output')
