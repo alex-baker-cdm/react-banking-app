@@ -1,4 +1,4 @@
-name: Devin UI Test
+name: Devin CI Checks
 
 on:
   push:
@@ -124,3 +124,195 @@ jobs:
           fi
           
           echo "UI test $TEST_NAME passed!"
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Create Devin Session
+        id: create-session
+        env:
+          DEVIN_API_KEY_V3: ${{ secrets.DEVIN_API_KEY_V3 }}
+          DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
+          DEVIN_PLAYBOOK_ID: "playbook-f50d643119a0491b89c2a74765931e1c"
+        run: |
+          echo "Creating Devin session for documentation check..."
+          
+          RESPONSE=$(curl -s --request POST \
+            --url "https://api.devin.ai/v3beta1/organizations/${DEVIN_ORG_ID}/sessions" \
+            --header "Authorization: Bearer ${DEVIN_API_KEY_V3}" \
+            --header 'Content-Type: application/json' \
+            --data "{
+              \"prompt\": \"Run the Documentation Update Check playbook for the react-banking-app repository.\",
+              \"playbook_id\": \"${DEVIN_PLAYBOOK_ID}\"
+            }")
+          
+          echo "Response: $RESPONSE"
+          
+          SESSION_ID=$(echo "$RESPONSE" | jq -r '.session_id')
+          if [ "$SESSION_ID" == "null" ] || [ -z "$SESSION_ID" ]; then
+            echo "Failed to create session"
+            exit 1
+          fi
+          
+          echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
+          echo "Created session: $SESSION_ID"
+
+      - name: Wait for Session to Complete
+        id: wait-session
+        env:
+          DEVIN_API_KEY_V1: ${{ secrets.DEVIN_API_KEY_V1 }}
+          SESSION_ID: ${{ steps.create-session.outputs.session_id }}
+        run: |
+          echo "Waiting for session $SESSION_ID to complete..."
+          
+          MAX_ATTEMPTS=40
+          ATTEMPT=0
+          
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            RESPONSE=$(curl -s --request GET \
+              --url "https://api.devin.ai/v1/sessions/${SESSION_ID}" \
+              --header "Authorization: Bearer ${DEVIN_API_KEY_V1}")
+            
+            STATUS=$(echo "$RESPONSE" | jq -r '.status_enum')
+            echo "Attempt $((ATTEMPT+1))/$MAX_ATTEMPTS - Status: $STATUS"
+            
+            if [ "$STATUS" == "finished" ] || [ "$STATUS" == "stopped" ] || [ "$STATUS" == "suspended" ] || [ "$STATUS" == "blocked" ]; then
+              echo "Session completed with status: $STATUS"
+              
+              STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -c '.structured_output')
+              echo "structured_output=$STRUCTURED_OUTPUT" >> $GITHUB_OUTPUT
+              
+              CHECK_PASSED=$(echo "$RESPONSE" | jq -r '.structured_output.check_passed // false')
+              echo "check_passed=$CHECK_PASSED" >> $GITHUB_OUTPUT
+              
+              DETAILS=$(echo "$RESPONSE" | jq -r '.structured_output.details // "No details"')
+              echo "details=$DETAILS" >> $GITHUB_OUTPUT
+              
+              break
+            fi
+            
+            ATTEMPT=$((ATTEMPT+1))
+            sleep 15
+          done
+          
+          if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+            echo "Session timed out"
+            echo "check_passed=false" >> $GITHUB_OUTPUT
+            echo "details=Session timed out after 10 minutes" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Results
+        env:
+          CHECK_PASSED: ${{ steps.wait-session.outputs.check_passed }}
+          DETAILS: ${{ steps.wait-session.outputs.details }}
+          SESSION_ID: ${{ steps.create-session.outputs.session_id }}
+        run: |
+          echo "Documentation Check Results:"
+          echo "  Passed: $CHECK_PASSED"
+          echo "  Details: $DETAILS"
+          echo "  Session: https://app.devin.ai/sessions/$SESSION_ID"
+          
+          if [ "$CHECK_PASSED" != "true" ]; then
+            echo "Documentation check failed!"
+            exit 1
+          fi
+          
+          echo "Documentation check passed!"
+
+  cross-repo-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Create Devin Session
+        id: create-session
+        env:
+          DEVIN_API_KEY_V3: ${{ secrets.DEVIN_API_KEY_V3 }}
+          DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
+          DEVIN_PLAYBOOK_ID: "playbook-1c65933f913f48f582399ab27d55a20d"
+        run: |
+          echo "Creating Devin session for cross-repo dependency check..."
+          
+          RESPONSE=$(curl -s --request POST \
+            --url "https://api.devin.ai/v3beta1/organizations/${DEVIN_ORG_ID}/sessions" \
+            --header "Authorization: Bearer ${DEVIN_API_KEY_V3}" \
+            --header 'Content-Type: application/json' \
+            --data "{
+              \"prompt\": \"Run the Cross-Repo Dependency Check playbook for the react-banking-app repository.\",
+              \"playbook_id\": \"${DEVIN_PLAYBOOK_ID}\"
+            }")
+          
+          echo "Response: $RESPONSE"
+          
+          SESSION_ID=$(echo "$RESPONSE" | jq -r '.session_id')
+          if [ "$SESSION_ID" == "null" ] || [ -z "$SESSION_ID" ]; then
+            echo "Failed to create session"
+            exit 1
+          fi
+          
+          echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
+          echo "Created session: $SESSION_ID"
+
+      - name: Wait for Session to Complete
+        id: wait-session
+        env:
+          DEVIN_API_KEY_V1: ${{ secrets.DEVIN_API_KEY_V1 }}
+          SESSION_ID: ${{ steps.create-session.outputs.session_id }}
+        run: |
+          echo "Waiting for session $SESSION_ID to complete..."
+          
+          MAX_ATTEMPTS=40
+          ATTEMPT=0
+          
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            RESPONSE=$(curl -s --request GET \
+              --url "https://api.devin.ai/v1/sessions/${SESSION_ID}" \
+              --header "Authorization: Bearer ${DEVIN_API_KEY_V1}")
+            
+            STATUS=$(echo "$RESPONSE" | jq -r '.status_enum')
+            echo "Attempt $((ATTEMPT+1))/$MAX_ATTEMPTS - Status: $STATUS"
+            
+            if [ "$STATUS" == "finished" ] || [ "$STATUS" == "stopped" ] || [ "$STATUS" == "suspended" ] || [ "$STATUS" == "blocked" ]; then
+              echo "Session completed with status: $STATUS"
+              
+              STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -c '.structured_output')
+              echo "structured_output=$STRUCTURED_OUTPUT" >> $GITHUB_OUTPUT
+              
+              CHECK_PASSED=$(echo "$RESPONSE" | jq -r '.structured_output.check_passed // false')
+              echo "check_passed=$CHECK_PASSED" >> $GITHUB_OUTPUT
+              
+              DETAILS=$(echo "$RESPONSE" | jq -r '.structured_output.details // "No details"')
+              echo "details=$DETAILS" >> $GITHUB_OUTPUT
+              
+              break
+            fi
+            
+            ATTEMPT=$((ATTEMPT+1))
+            sleep 15
+          done
+          
+          if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+            echo "Session timed out"
+            echo "check_passed=false" >> $GITHUB_OUTPUT
+            echo "details=Session timed out after 10 minutes" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Results
+        env:
+          CHECK_PASSED: ${{ steps.wait-session.outputs.check_passed }}
+          DETAILS: ${{ steps.wait-session.outputs.details }}
+          SESSION_ID: ${{ steps.create-session.outputs.session_id }}
+        run: |
+          echo "Cross-Repo Dependency Check Results:"
+          echo "  Passed: $CHECK_PASSED"
+          echo "  Details: $DETAILS"
+          echo "  Session: https://app.devin.ai/sessions/$SESSION_ID"
+          
+          if [ "$CHECK_PASSED" != "true" ]; then
+            echo "Cross-repo dependency check failed!"
+            exit 1
+          fi
+          
+          echo "Cross-repo dependency check passed!"
