@@ -72,7 +72,7 @@ const Profile: React.FC = () => (
         <span className='material-symbols-outlined'>token</span>
         About us
       </Link>
-      <Link to='/profile' className='flex flex-v-center'>
+      <Link to='/' className='flex flex-v-center'>
         <span className='material-symbols-outlined'>power_settings_new</span>
         Sign out
       </Link>

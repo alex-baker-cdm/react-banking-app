@@ -30,6 +30,9 @@ jobs:
           - test_name: profile_page_flow
             playbook_id: playbook-a2eb4a5ba8784d73bf33b9a85477c2bb
             prompt: "Run the Profile Page Flow Test playbook for the react-banking-app repository."
+          - test_name: sign_out_flow
+            playbook_id: playbook-sign-out-flow-test
+            prompt: "Test the sign-out flow for the react-banking-app repository. Steps: 1) Start the app locally with yarn start, 2) Sign in with any email and password, 3) Click the profile icon to navigate to the profile page, 4) Click the Sign out button at the bottom of the profile page, 5) Verify that the user is redirected back to the sign-in page. Report test_passed=true if the sign-out redirects to the sign-in page successfully, otherwise report test_passed=false with details."
     
     steps:
       - name: Create Devin Session
