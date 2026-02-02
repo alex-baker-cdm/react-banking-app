@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Sentry } from '../sentry';
 
 // components
 import Input from '../components/Form/Input';
@@ -50,10 +49,6 @@ const Signin: React.FC = () => {
     const error = validateEmail(email);
     if (error) {
       setEmailError(error);
-      Sentry.captureMessage(`Email validation error: ${error}`, {
-        level: 'warning',
-        extra: { email },
-      });
       return;
     }
 
