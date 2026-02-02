@@ -32,7 +32,7 @@ jobs:
             prompt: "Run the Profile Page Flow Test playbook for the react-banking-app repository."
           - test_name: sign_out_flow
             playbook_id: playbook-47616efedce240fc845ea80e493fd040
-            prompt: "Run the Sign Out Flow Test playbook for the react-banking-app repository."
+            prompt: "Run the Sign Out Flow Test playbook for the react-banking-app repository. Branch: ${{ github.head_ref || github.ref_name }}. Clone the repo and checkout the branch (${{ github.head_ref || github.ref_name }}) before testing."
     
     steps:
       - name: Create Devin Session
