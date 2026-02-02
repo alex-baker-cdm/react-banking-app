@@ -274,6 +274,18 @@ header .header-button span {
   border: 2px solid #190537;
 }
 
+.input.error {
+  border: 2px solid #f42d53;
+}
+
+.error-message {
+  display: block;
+  color: #f42d53;
+  font-size: 0.85em;
+  margin-top: 5px;
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.5);
+}
+
 .button {
   width: 100%;
   padding: 10px;
