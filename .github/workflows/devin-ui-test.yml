@@ -50,7 +50,7 @@ jobs:
             --header "Authorization: Bearer ${DEVIN_API_KEY_V3}" \
             --header 'Content-Type: application/json' \
             --data "{
-              \"prompt\": \"${DEVIN_PROMPT}\",
+              \"prompt\": \"${DEVIN_PROMPT} Repository: ${{ github.repository }}, PR #${{ github.event.pull_request.number }}, Branch: ${{ github.head_ref }}.\",
               \"playbook_id\": \"${DEVIN_PLAYBOOK_ID}\"
             }")
           
@@ -147,7 +147,7 @@ jobs:
             --header "Authorization: Bearer ${DEVIN_API_KEY_V3}" \
             --header 'Content-Type: application/json' \
             --data "{
-              \"prompt\": \"Run the Documentation Update Check playbook for the react-banking-app repository.\",
+              \"prompt\": \"Run the Documentation Update Check playbook for the react-banking-app repository. Repository: ${{ github.repository }}, PR #${{ github.event.pull_request.number }}, Branch: ${{ github.head_ref }}.\",
               \"playbook_id\": \"${DEVIN_PLAYBOOK_ID}\"
             }")
           
@@ -243,7 +243,7 @@ jobs:
             --header "Authorization: Bearer ${DEVIN_API_KEY_V3}" \
             --header 'Content-Type: application/json' \
             --data "{
-              \"prompt\": \"Run the Cross-Repo Dependency Check playbook for the react-banking-app repository.\",
+              \"prompt\": \"Run the Cross-Repo Dependency Check playbook for the react-banking-app repository. Repository: ${{ github.repository }}, PR #${{ github.event.pull_request.number }}, Branch: ${{ github.head_ref }}.\",
               \"playbook_id\": \"${DEVIN_PLAYBOOK_ID}\"
             }")
           
