@@ -75,6 +75,27 @@ If you like this resource, please follow me on GitHub. Thank you!
 
 Once the application is started, navigate to [http://localhost:3000](http://localhost:3000) in your browser to test application.
 
+## Error Tracking with Sentry
+
+This application includes [Sentry](https://sentry.io) for error monitoring, performance tracing, and session replay.
+
+**Features:**
+- Automatic error capture and reporting
+- Browser performance tracing
+- Session replay for debugging user issues
+- ErrorBoundary component wrapping the app to catch React errors
+
+**Configuration:**
+
+The Sentry DSN is configured in `src/sentry.ts`. If you fork this repository, replace the DSN with your own from your Sentry project settings.
+
+**Sample Rates (configurable in `src/sentry.ts`):**
+- `tracesSampleRate: 1.0` - Captures 100% of transactions for performance monitoring (reduce in production to manage costs)
+- `replaysSessionSampleRate: 0.1` - Captures 10% of all sessions for replay
+- `replaysOnErrorSampleRate: 1.0` - Captures 100% of sessions with errors for replay
+
+**Note:** The test error button on the Home page is for verifying Sentry integration and should be removed before production deployment.
+
 ## Contributing
 
 If you would like to contribute, please create a new branch and submit a pull request with your changes. Review may be needed before acceptance.
