@@ -423,6 +423,7 @@ jobs:
         env:
           DEVIN_API_KEY_V3: ${{ secrets.DEVIN_API_KEY_V3 }}
           DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
+          DEVIN_PLAYBOOK_ID: "playbook-47616efedce240fc845ea80e493fd040"
         run: |
           echo "Creating Devin session for sign-out flow test..."
           
@@ -430,9 +431,10 @@ jobs:
             --url "https://api.devin.ai/v3beta1/organizations/${DEVIN_ORG_ID}/sessions" \
             --header "Authorization: Bearer ${DEVIN_API_KEY_V3}" \
             --header 'Content-Type: application/json' \
-            --data '{
-              "prompt": "Test the sign-out flow for the react-banking-app repository. Steps: 1) Clone the repo alex-baker-cdm/react-banking-app, 2) Run yarn install and yarn start to start the app, 3) Open the app in the browser, 4) Sign in with any valid email (e.g. test@example.com) and password, 5) Click the profile icon in the top left to navigate to the profile page, 6) Scroll down and click the Sign out button at the bottom of the profile page, 7) Verify that the user is redirected back to the sign-in page (URL should be / and show the Hello greeting with sign-in form). Report test_passed=true if the sign-out redirects to the sign-in page successfully, otherwise report test_passed=false with details."
-            }')
+            --data "{
+              \"prompt\": \"Run the Sign Out Flow Test playbook for the react-banking-app repository.\",
+              \"playbook_id\": \"${DEVIN_PLAYBOOK_ID}\"
+            }")
           
           echo "Response: $RESPONSE"
           
