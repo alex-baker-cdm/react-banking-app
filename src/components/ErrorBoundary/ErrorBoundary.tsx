@@ -2,19 +2,22 @@ import * as Sentry from '@sentry/react';
 import React from 'react';
 
 interface ErrorFallbackProps {
-  error: Error;
+  error: unknown;
   resetError: () => void;
 }
 
-const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => (
-  <div role='alert' style={{ padding: '20px', textAlign: 'center' }}>
-    <h2>Something went wrong</h2>
-    <p>{error.message}</p>
-    <button onClick={resetError} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-      Try again
-    </button>
-  </div>
-);
+const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
+  const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+  return (
+    <div role="alert" style={{ padding: '20px', textAlign: 'center' }}>
+      <h2>Something went wrong</h2>
+      <p>{errorMessage}</p>
+      <button onClick={resetError} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+        Try again
+      </button>
+    </div>
+  );
+};
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
