@@ -27,7 +27,8 @@ export function useScreenLoadMonitor({
 
     if (loadTime > thresholdMs) {
       hasReportedRef.current = true;
-      Sentry.captureException(new Error(`Screen load time exceeded threshold: ${screenName}`), {
+      Sentry.captureMessage(`Screen load time exceeded threshold: ${screenName}`, {
+        level: 'warning',
         tags: {
           screen: screenName,
           loadTimeMs: Math.round(loadTime),
