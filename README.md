@@ -94,8 +94,6 @@ The Sentry DSN is configured in `src/sentry.ts`. If you fork this repository, re
 - `replaysSessionSampleRate: 0.1` - Captures 10% of all sessions for replay
 - `replaysOnErrorSampleRate: 1.0` - Captures 100% of sessions with errors for replay
 
-**Note:** The test error button on the Home page is for verifying Sentry integration and should be removed before production deployment.
-
 ## Contributing
 
 If you would like to contribute, please create a new branch and submit a pull request with your changes. Review may be needed before acceptance.
