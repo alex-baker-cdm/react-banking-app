@@ -80,6 +80,7 @@ Once the application is started, navigate to [http://localhost:3000](http://loca
 This application includes [Sentry](https://sentry.io) for error monitoring, performance tracing, and session replay.
 
 **Features:**
+
 - Automatic error capture and reporting
 - Browser performance tracing
 - Session replay for debugging user issues
@@ -90,6 +91,7 @@ This application includes [Sentry](https://sentry.io) for error monitoring, perf
 The Sentry DSN is configured in `src/sentry.ts`. If you fork this repository, replace the DSN with your own from your Sentry project settings.
 
 **Sample Rates (configurable in `src/sentry.ts`):**
+
 - `tracesSampleRate: 1.0` - Captures 100% of transactions for performance monitoring (reduce in production to manage costs)
 - `replaysSessionSampleRate: 0.1` - Captures 10% of all sessions for replay
 - `replaysOnErrorSampleRate: 1.0` - Captures 100% of sessions with errors for replay
