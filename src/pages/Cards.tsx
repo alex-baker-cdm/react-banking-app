@@ -6,7 +6,7 @@ import History from '../components/History/History';
 import Divider from '../components/Divider/Divider';
 import { useScreenLoadMonitor } from '../hooks/useScreenLoadMonitor';
 
-const SIMULATED_LOAD_DELAY_MS = 5000;
+const SIMULATED_LOAD_DELAY_MS = 1000;
 
 const Cards: React.FC = () => {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
