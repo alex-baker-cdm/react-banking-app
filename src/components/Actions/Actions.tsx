@@ -9,10 +9,10 @@ const Actions: React.FC = () => (
       <span className='text-shadow'>Add money</span>
     </div>
     <div className='circle no-select flex flex-col flex-v-center flex-h-center'>
-      <Link to='/home' className='flex flex-v-center flex-h-center'>
-        <span className='material-symbols-outlined'>sync</span>
+      <Link to='/send' className='flex flex-v-center flex-h-center'>
+        <span className='material-symbols-outlined'>send</span>
       </Link>
-      <span className='text-shadow'>Exchange</span>
+      <span className='text-shadow'>Send</span>
     </div>
     <div className='circle no-select flex flex-col flex-v-center flex-h-center'>
       <Link to='/home' className='flex flex-v-center flex-h-center'>
