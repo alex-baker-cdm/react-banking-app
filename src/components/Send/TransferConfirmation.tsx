@@ -60,18 +60,8 @@ const TransferConfirmation: React.FC<IProps> = ({
       <p className='information text-shadow'>{currency}</p>
     </div>
 
-    <div
-      className='add-buttons flex flex-space-between'
-      role='button'
-      tabIndex={0}
-      onClick={onConfirm}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onConfirm();
-        }
-      }}
-    >
-      <Button type='button' text='Confirm & Send' tabIndex={0} />
+    <div className='add-buttons flex flex-space-between'>
+      <Button type='button' text='Confirm & Send' tabIndex={0} onClick={onConfirm} />
     </div>
     <div className='center' style={{ marginTop: '15px' }}>
       <button
