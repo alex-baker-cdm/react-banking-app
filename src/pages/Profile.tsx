@@ -55,7 +55,7 @@ const Profile: React.FC = () => (
         <span className='material-symbols-outlined'>notifications</span>
         Notification settings
       </Link>
-      <Link to='/profile' className='flex flex-v-center'>
+      <Link to='/theme' className='flex flex-v-center'>
         <span className='material-symbols-outlined'>contrast</span>
         Appearance
       </Link>

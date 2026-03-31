@@ -9,6 +9,7 @@ import Profile from '../pages/Profile';
 import Savings from '../pages/Savings';
 import SendMoney from '../pages/SendMoney';
 import Transactions from '../pages/Transactions';
+import ThemeSettings from '../pages/ThemeSettings';
 
 const Navigation: React.FC = () => (
   <Routes>
@@ -20,6 +21,7 @@ const Navigation: React.FC = () => (
     <Route path='/savings' element={<Savings />} />
     <Route path='/send' element={<SendMoney />} />
     <Route path='/transactions' element={<Transactions />} />
+    <Route path='/theme' element={<ThemeSettings />} />
   </Routes>
 );
 
