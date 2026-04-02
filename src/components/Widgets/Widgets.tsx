@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 
 const Widgets: React.FC = () => (
-  <div className='widgets flex flex-v-center flex-space-between'>
+  <div
+    className='widgets flex flex-v-center'
+    style={{ flexWrap: 'wrap', gap: '15px', justifyContent: 'center' }}
+  >
     <Link to='/transactions' className='widget no-select flex flex-col flex-v-center flex-h-center'>
       <span className='material-symbols-outlined'>sync_alt</span>
       <p>Transactions</p>
@@ -13,6 +16,10 @@ const Widgets: React.FC = () => (
     <Link to='/savings' className='widget no-select flex flex-col flex-v-center flex-h-center'>
       <span className='material-symbols-outlined'>savings</span>
       <p>Savings</p>
+    </Link>
+    <Link to='/analytics' className='widget no-select flex flex-col flex-v-center flex-h-center'>
+      <span className='material-symbols-outlined'>analytics</span>
+      <p>Analytics</p>
     </Link>
   </div>
 );
