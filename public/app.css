@@ -673,6 +673,55 @@ header .header-button span {
   background-repeat: no-repeat;
 }
 
+.transactions-search {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 50em;
+  margin-bottom: 15px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.transactions-search span {
+  color: #ffffff;
+  font-size: 1.3em;
+}
+
+.transactions-search input {
+  width: 100%;
+  color: #ffffff;
+  padding: 10px 0 10px 5px;
+}
+
+.transactions-search input::placeholder {
+  opacity: 1;
+  color: #ffffff;
+  user-select: none;
+  --webkit-user-select: none;
+}
+
+.transactions-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+
+.filter-pill {
+  padding: 5px 14px;
+  font-size: 0.85em;
+  color: #ffffff;
+  border-radius: 50em;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s;
+}
+
+.filter-pill.active {
+  background-color: #ff8057;
+  color: #000000;
+  font-weight: 500;
+}
+
 footer {
   color: #999999;
   font-size: 0.8em;
