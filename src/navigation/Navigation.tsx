@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 
 // components
 import Add from '../pages/Add';
+import Bills from '../pages/Bills';
 import Home from '../pages/Home';
 import Cards from '../pages/Cards';
 import Signin from '../pages/Signin';
@@ -16,6 +17,7 @@ const Navigation: React.FC = () => (
   <Routes>
     <Route path='/' element={<Signin />} />
     <Route path='/add' element={<Add />} />
+    <Route path='/bills' element={<Bills />} />
     <Route path='/home' element={<Home />} />
     <Route path='/cards' element={<Cards />} />
     <Route path='/profile' element={<Profile />} />
