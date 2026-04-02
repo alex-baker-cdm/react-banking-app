@@ -12,6 +12,7 @@ const Button: React.FC<IProps> = ({ type, text, tabIndex, disabled = false, onCl
     tabIndex={tabIndex}
     type={type === 'submit' ? 'submit' : 'button'}
     className={`button ${disabled ? 'disabled' : 'active'}`}
+    disabled={disabled}
     onClick={onClick}
   >
     {text}

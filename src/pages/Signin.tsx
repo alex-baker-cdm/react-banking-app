@@ -10,6 +10,10 @@ const Signin: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
    * Validates an email address format.
@@ -29,7 +33,23 @@ const Signin: React.FC = () => {
   };
 
   /**
-   * Handles email input change and validates the email.
+   * Validates a password value.
+   *
+   * @param {string} password - The password to validate.
+   * @returns {string} Error message if invalid, empty string if valid.
+   */
+  const validatePassword = (password: string): string => {
+    if (!password) {
+      return 'Password is required';
+    }
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return '';
+  };
+
+  /**
+   * Handles email input change and clears the error.
    *
    * @param {React.ChangeEvent<HTMLInputElement>} e - The input change event.
    */
@@ -40,23 +60,44 @@ const Signin: React.FC = () => {
   };
 
   /**
-   * Handles the form submission event by preventing the default behavior and navigating to the home page.
+   * Handles password input change and clears the error.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The input change event.
+   */
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setPassword(value);
+    setPasswordError('');
+  };
+
+  /**
+   * Handles the form submission event by validating inputs and navigating to the home page.
    *
    * @param {React.FormEvent} e - The form submission event.
    */
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
 
-    const error = validateEmail(email);
-    if (error) {
-      setEmailError(error);
-      Sentry.captureMessage(`Email validation error: ${error}`, {
+    const emailValidationError = validateEmail(email);
+    const passwordValidationError = validatePassword(password);
+
+    if (emailValidationError) {
+      setEmailError(emailValidationError);
+      Sentry.captureMessage(`Email validation error: ${emailValidationError}`, {
         level: 'warning',
         extra: { email },
       });
+    }
+
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
+    }
+
+    if (emailValidationError || passwordValidationError) {
       return;
     }
 
+    setIsSubmitting(true);
     navigate('/home', { replace: true });
   };
 
@@ -80,7 +121,7 @@ const Signin: React.FC = () => {
               name='email'
               type='email'
               value={email}
-              autoComplete={false}
+              autoComplete='off'
               placeholder='Please enter your email'
               error={emailError}
               onChange={handleEmailChange}
@@ -91,6 +132,7 @@ const Signin: React.FC = () => {
               <label htmlFor='password' className='text-shadow'>
                 Password
               </label>
+              {/* TODO: Update to point to a dedicated forgot-password flow */}
               <Link to='/' className='text-shadow'>
                 Forgot password?
               </Link>
@@ -99,17 +141,39 @@ const Signin: React.FC = () => {
               required
               tabIndex={0}
               name='password'
-              type='password'
-              autoComplete={false}
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              autoComplete='off'
               placeholder='Please enter your password'
+              error={passwordError}
+              onChange={handlePasswordChange}
+              endAdornment={
+                <button
+                  type='button'
+                  className='password-toggle'
+                  tabIndex={0}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <span className='material-symbols-outlined'>
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              }
             />
           </div>
           <div className='form-line'>
-            <Button type='submit' text='Sign in' tabIndex={0} />
+            <Button
+              type='submit'
+              text={isSubmitting ? 'Signing in...' : 'Sign in'}
+              tabIndex={0}
+              disabled={isSubmitting}
+            />
           </div>
         </form>
 
         <div className='links'>
+          {/* TODO: Update to point to a dedicated sign-up page */}
           <a href='/' className='text-shadow'>
             Click here
           </a>

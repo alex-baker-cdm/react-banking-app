@@ -6,9 +6,10 @@ interface IProps {
   tabIndex: number;
   required?: boolean;
   placeholder: string;
-  autoComplete?: boolean;
+  autoComplete?: string;
   error?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  endAdornment?: React.ReactNode;
 }
 
 const Input: React.FC<IProps> = ({
@@ -18,23 +19,27 @@ const Input: React.FC<IProps> = ({
   tabIndex,
   placeholder,
   required = false,
-  autoComplete = false,
+  autoComplete = 'off',
   error,
   onChange,
+  endAdornment,
 }) => (
   <div className='input-wrapper'>
-    <input
-      id={name}
-      name={name}
-      type={type}
-      value={value}
-      tabIndex={tabIndex}
-      required={required}
-      placeholder={placeholder}
-      autoComplete={autoComplete ? 'on' : 'off'}
-      onChange={onChange}
-      className={`input${error ? ' input-error' : ''}`}
-    />
+    <div className='input-container'>
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={value}
+        tabIndex={tabIndex}
+        required={required}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        onChange={onChange}
+        className={`input${error ? ' input-error' : ''}`}
+      />
+      {endAdornment && <div className='input-end-adornment'>{endAdornment}</div>}
+    </div>
     {error && <span className='input-error-message'>{error}</span>}
   </div>
 );
