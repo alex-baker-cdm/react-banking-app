@@ -35,6 +35,14 @@ const Header: React.FC = () => {
         <Link to='/cards' className='header-button flex flex-v-center flex-h-center'>
           <span className='material-symbols-outlined'>credit_card</span>
         </Link>
+        <Link
+          to='/notifications'
+          className='header-button flex flex-v-center flex-h-center'
+          style={{ position: 'relative', marginLeft: 10 }}
+        >
+          <span className='material-symbols-outlined'>notifications</span>
+          <span className='badge'>3</span>
+        </Link>
       </div>
     </header>
   );

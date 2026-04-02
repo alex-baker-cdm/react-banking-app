@@ -8,6 +8,7 @@ import Signin from '../pages/Signin';
 import Profile from '../pages/Profile';
 import Savings from '../pages/Savings';
 import SendMoney from '../pages/SendMoney';
+import Notifications from '../pages/Notifications';
 import Transactions from '../pages/Transactions';
 
 const Navigation: React.FC = () => (
@@ -19,6 +20,7 @@ const Navigation: React.FC = () => (
     <Route path='/profile' element={<Profile />} />
     <Route path='/savings' element={<Savings />} />
     <Route path='/send' element={<SendMoney />} />
+    <Route path='/notifications' element={<Notifications />} />
     <Route path='/transactions' element={<Transactions />} />
   </Routes>
 );
