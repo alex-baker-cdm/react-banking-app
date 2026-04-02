@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repository Portfolio Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-card: #1e293b;
+    --bg-card-hover: #263348;
+    --border: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-green: #10b981;
+    --accent-yellow: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-cyan: #06b6d4;
+    --accent-pink: #ec4899;
+    --accent-orange: #f97316;
+    --gradient-1: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    --gradient-2: linear-gradient(135deg, #10b981, #06b6d4);
+    --gradient-3: linear-gradient(135deg, #f59e0b, #f97316);
+    --gradient-4: linear-gradient(135deg, #ec4899, #ef4444);
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .dashboard {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 48px 24px 32px;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-blue), var(--accent-purple), transparent);
+  }
+  .header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .header .subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+  .header .meta {
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  /* KPI Cards Row */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .kpi-card .kpi-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+  .kpi-card .kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .kpi-card .kpi-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .kpi-card .kpi-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .kpi-icon.blue { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .kpi-icon.green { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+  .kpi-icon.purple { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+  .kpi-icon.yellow { background: rgba(245,158,11,0.15); color: var(--accent-yellow); }
+  .kpi-icon.cyan { background: rgba(6,182,212,0.15); color: var(--accent-cyan); }
+  .kpi-icon.pink { background: rgba(236,72,153,0.15); color: var(--accent-pink); }
+
+  /* Section */
+  .section {
+    margin-bottom: 32px;
+  }
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .section-title .dot.blue { background: var(--accent-blue); }
+  .section-title .dot.green { background: var(--accent-green); }
+  .section-title .dot.purple { background: var(--accent-purple); }
+  .section-title .dot.yellow { background: var(--accent-yellow); }
+  .section-title .dot.cyan { background: var(--accent-cyan); }
+  .section-title .dot.pink { background: var(--accent-pink); }
+
+  /* Chart containers */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 900px) {
+    .chart-grid { grid-template-columns: 1fr; }
+  }
+  .chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: box-shadow 0.2s;
+  }
+  .chart-card:hover {
+    box-shadow: var(--shadow);
+  }
+  .chart-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+  }
+  .chart-card canvas {
+    max-height: 350px;
+  }
+  .chart-card.wide {
+    grid-column: 1 / -1;
+  }
+
+  /* Health gauge */
+  .health-overview {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 768px) {
+    .health-overview { grid-template-columns: 1fr; }
+  }
+  .health-gauge {
+    text-align: center;
+    padding: 20px;
+  }
+  .gauge-value {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    margin: 12px 0 4px;
+  }
+  .gauge-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+  .health-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .health-bar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .health-bar-label {
+    min-width: 180px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+  .health-bar-track {
+    flex: 1;
+    height: 28px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .health-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    transition: width 1s ease;
+  }
+
+  /* Repo table */
+  .repo-table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .repo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .repo-table th {
+    background: var(--bg-secondary);
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .repo-table th:hover {
+    color: var(--text-primary);
+  }
+  .repo-table th .sort-arrow {
+    margin-left: 4px;
+    opacity: 0.4;
+  }
+  .repo-table th.sorted .sort-arrow {
+    opacity: 1;
+    color: var(--accent-blue);
+  }
+  .repo-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(51,65,85,0.5);
+    vertical-align: middle;
+  }
+  .repo-table tr:hover td {
+    background: var(--bg-card-hover);
+  }
+  .repo-table .repo-name {
+    font-weight: 600;
+    color: var(--accent-blue);
+  }
+  .repo-table .repo-name a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .repo-table .repo-name a:hover {
+    text-decoration: underline;
+  }
+  .repo-desc {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Tags */
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin: 1px 2px;
+    white-space: nowrap;
+  }
+  .tag.lang { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .tag.fw { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+  .tag.ci { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+  .tag.lint { background: rgba(245,158,11,0.15); color: var(--accent-yellow); }
+
+  /* Health badge */
+  .health-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 24px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
+  .health-badge.excellent { background: rgba(16,185,129,0.2); color: var(--accent-green); }
+  .health-badge.good { background: rgba(59,130,246,0.2); color: var(--accent-blue); }
+  .health-badge.fair { background: rgba(245,158,11,0.2); color: var(--accent-yellow); }
+  .health-badge.poor { background: rgba(239,68,68,0.2); color: var(--accent-red); }
+
+  /* Bool indicators */
+  .bool-yes { color: var(--accent-green); font-weight: 600; }
+  .bool-no { color: var(--text-muted); }
+
+  /* Category cards */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .category-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .category-card h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .category-card .cat-count {
+    font-size: 0.7rem;
+    background: rgba(255,255,255,0.08);
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: var(--text-muted);
+  }
+  .category-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .category-card li {
+    padding: 4px 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .category-card li::before {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* Filter/search bar */
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box:focus {
+    border-color: var(--accent-blue);
+  }
+  .search-box::placeholder {
+    color: var(--text-muted);
+  }
+  .filter-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    background: rgba(59,130,246,0.08);
+  }
+
+  /* Scrollable table container */
+  .table-container {
+    max-height: 600px;
+    overflow-y: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .table-container::-webkit-scrollbar {
+    width: 6px;
+  }
+  .table-container::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+  .table-container::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .dashboard { padding: 12px; }
+    .header h1 { font-size: 1.8rem; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi-card .kpi-value { font-size: 1.5rem; }
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section {
+    animation: fadeIn 0.5s ease forwards;
+  }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+  <!-- Header -->
+  <div class="header">
+    <h1>Repository Portfolio Dashboard</h1>
+    <div class="subtitle">Comprehensive analysis across 41 repositories</div>
+    <div class="meta">Generated on April 2, 2026 &bull; alex-baker-cdm &bull; 60,923 files analyzed</div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon blue">&#128230;</div>
+      <div class="kpi-value">41</div>
+      <div class="kpi-label">Total Repositories</div>
+      <div class="kpi-sub">9 categories</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon purple">&#128196;</div>
+      <div class="kpi-value">22</div>
+      <div class="kpi-label">Programming Languages</div>
+      <div class="kpi-sub">8,869,727 total lines of code</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon green">&#9881;</div>
+      <div class="kpi-value">39</div>
+      <div class="kpi-label">Frameworks & Tools</div>
+      <div class="kpi-sub">across all repos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon cyan">&#128269;</div>
+      <div class="kpi-value">6,081</div>
+      <div class="kpi-label">Test Files</div>
+      <div class="kpi-sub">756,826 lines of test code</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon yellow">&#128736;</div>
+      <div class="kpi-value">19</div>
+      <div class="kpi-label">CI/CD Enabled</div>
+      <div class="kpi-sub">19/41 repos (46%)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon pink">&#128147;</div>
+      <div class="kpi-value">61</div>
+      <div class="kpi-label">Avg Health Score</div>
+      <div class="kpi-sub">out of 100</div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1: Languages -->
+  <div class="section">
+    <div class="section-title"><span class="dot blue"></span> Language Distribution</div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Lines of Code by Language (Top 12)</h3>
+        <canvas id="langBarChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Language Share (by Lines of Code)</h3>
+        <canvas id="langPieChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2: Frameworks -->
+  <div class="section">
+    <div class="section-title"><span class="dot purple"></span> Frameworks & Libraries</div>
+    <div class="chart-grid">
+      <div class="chart-card wide">
+        <h3>Frameworks &amp; Tools Adoption (repos using each)</h3>
+        <canvas id="fwChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 3: Test Coverage & Health -->
+  <div class="section">
+    <div class="section-title"><span class="dot green"></span> Test Coverage &amp; Codebase Health</div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Test Files per Repository</h3>
+        <canvas id="testChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Health Score Distribution</h3>
+        <canvas id="healthDistChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Health Overview -->
+  <div class="section">
+    <div class="section-title"><span class="dot yellow"></span> Health Metrics Breakdown</div>
+    <div class="chart-card wide" style="margin-bottom: 20px;">
+      <div class="health-overview">
+        <div class="health-gauge">
+          <div class="gauge-value" style="color: var(--accent-yellow);">
+            61
+          </div>
+          <div class="gauge-label">Average Health Score</div>
+          <div style="margin-top: 16px; text-align: left;">
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin:6px 0;color:var(--accent-green);">
+              <span>Excellent (80-100)</span><span>16 repos</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin:6px 0;color:var(--accent-blue);">
+              <span>Good (60-79)</span><span>6 repos</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin:6px 0;color:var(--accent-yellow);">
+              <span>Fair (40-59)</span><span>10 repos</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin:6px 0;color:var(--accent-red);">
+              <span>Poor (0-39)</span><span>9 repos</span>
+            </div>
+          </div>
+        </div>
+        <div class="health-bars">
+          <div class="health-bar-item">
+            <span class="health-bar-label">Has README</span>
+            <div class="health-bar-track">
+              <div class="health-bar-fill" style="width:98%;background:var(--gradient-2);">
+                40/41 (98%)
+              </div>
+            </div>
+          </div>
+          <div class="health-bar-item">
+            <span class="health-bar-label">Has License</span>
+            <div class="health-bar-track">
+              <div class="health-bar-fill" style="width:71%;background:var(--gradient-1);">
+                29/41 (71%)
+              </div>
+            </div>
+          </div>
+          <div class="health-bar-item">
+            <span class="health-bar-label">Has CI/CD</span>
+            <div class="health-bar-track">
+              <div class="health-bar-fill" style="width:46%;background:var(--gradient-3);">
+                19/41 (46%)
+              </div>
+            </div>
+          </div>
+          <div class="health-bar-item">
+            <span class="health-bar-label">Has Linter Config</span>
+            <div class="health-bar-track">
+              <div class="health-bar-fill" style="width:27%;background:var(--gradient-4);">
+                11/41 (27%)
+              </div>
+            </div>
+          </div>
+          <div class="health-bar-item">
+            <span class="health-bar-label">Has Tests</span>
+            <div class="health-bar-track">
+              <div class="health-bar-fill" style="width:76%;background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));">
+                31/41 (76%)
+              </div>
+            </div>
+          </div>
+          <div class="health-bar-item">
+            <span class="health-bar-label">Has CONTRIBUTING.md</span>
+            <div class="health-bar-track">
+              <div class="health-bar-fill" style="width:22%;background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));">
+                9/41 (22%)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Breakdown -->
+  <div class="section">
+    <div class="section-title"><span class="dot cyan"></span> Repository Categories</div>
+    <div class="category-grid">
+
+      <div class="category-card">
+        <h4>&#128179; Banking & Finance <span class="cat-count">5</span></h4>
+        <ul>
+          <li>react-banking-app<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Modern React banking app template — responsive, cu...</span></li>
+          <li>banking-oss<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Open source banking web app — React.js and Node.js</span></li>
+          <li>bank-server<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Backend with double-entry bookkeeping — NestJS, RE...</span></li>
+          <li>bank-client<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Frontend: React.js, Hooks, Redux, Saga, Ant Design...</span></li>
+          <li>cics-banking-sample-application-cbsa<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">CICS banking sample application (COBOL)</span></li>
+        </ul>
+      </div>
+
+      <div class="category-card">
+        <h4>&#128202; ETL & Data <span class="cat-count">7</span></h4>
+        <ul>
+          <li>ETL_Oracle_to_Hadoop_DataLake<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">ETL Pipeline: Oracle to Hadoop DataLake on PySpark</span></li>
+          <li>ETL4HiveOraTera<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">ETL scripts for Hive-Oracle-Teradata using PySpark</span></li>
+          <li>etl-python<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Simple ETL example in Python</span></li>
+          <li>oracle-cdc-to-data-lake<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Oracle CDC to Data Lake pipeline</span></li>
+          <li>python-training<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Python training for business analysts and traders</span></li>
+          <li>jupyter-fs<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Filesystem-like contents manager for Jupyter backe...</span></li>
+          <li>py-avro-schema<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Generate Apache Avro schemas for Python types</span></li>
+        </ul>
+      </div>
+
+      <div class="category-card">
+        <h4>&#127970; Enterprise & ERP <span class="cat-count">4</span></h4>
+        <ul>
+          <li>erpnext<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Free and Open Source Enterprise Resource Planning ...</span></li>
+          <li>metasfresh<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Open Source ERP — Fast, Flexible & Free Software</span></li>
+          <li>concord<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Workflow orchestration and continuous deployment m...</span></li>
+          <li>pih-pentaho<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">PIH Pentaho ETL configuration (Dockerfile-based)</span></li>
+        </ul>
+      </div>
+
+      <div class="category-card">
+        <h4>&#128241; Mobile <span class="cat-count">4</span></h4>
+        <ul>
+          <li>android-groceries-store<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Android Groceries Store app with modern dev skills</span></li>
+          <li>closetalk.app<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Chat App: Android, Kotlin, Jetpack Compose, MVI, K...</span></li>
+          <li>my_flutter_app<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Flutter mobile application</span></li>
+          <li>mamba<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Swift iOS/tvOS/macOS framework for HLS data parsin...</span></li>
+        </ul>
+      </div>
+
+      <div class="category-card">
+        <h4>&#127760; Web & Frontend <span class="cat-count">6</span></h4>
+        <ul>
+          <li>TR-FEF<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Thomson Reuters Front End Framework (HTML rich app...</span></li>
+          <li>ab-demo<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Alex Baker's demo repository</span></li>
+          <li>windsurf-demo<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Learn hands on how to use the Windsurf Editor</span></li>
+          <li>anu<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Immersive Visualization Toolkit for BabylonJS</span></li>
+          <li>cookie-cutter<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Opinionated micro-services framework for TypeScrip...</span></li>
+          <li>att-rcloud<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Collaborative data analysis and visualization</span></li>
+        </ul>
+      </div>
+
+      <div class="category-card">
+        <h4>&#9881; DevOps & Infra <span class="cat-count">3</span></h4>
+        <ul>
+          <li>docker-compose<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Define and run multi-container Docker applications</span></li>
+          <li>iac<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Infrastructure as Code repository</span></li>
+          <li>xGitGuard<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">AI-based Secrets Detection Python Framework</span></li>
+        </ul>
+      </div>
+
+      <div class="category-card">
+        <h4>&#128268; IoT & Hardware <span class="cat-count">1</span></h4>
+        <ul>
+          <li>HoneywellSecurityMQTT<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">MQTT integration for Honeywell wireless security s...</span></li>
+        </ul>
+      </div>
+
+      <div class="category-card">
+        <h4>&#128218; Libraries & Tools <span class="cat-count">6</span></h4>
+        <ul>
+          <li>ip4s<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Immutable, safe data structures for IP addresses &...</span></li>
+          <li>afkak<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Kafka client written in Twisted Python</span></li>
+          <li>js2model<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">JSON Schema to model code generator (C++)</span></li>
+          <li>att-ast<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">AST - AT&T Software Technology</span></li>
+          <li>unsafe<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Java classes using sun.misc.Unsafe</span></li>
+          <li>coldfusion-minute<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">ColdFusion examples: DB access, ORM, JSON/XML APIs</span></li>
+        </ul>
+      </div>
+
+      <div class="category-card">
+        <h4>&#127891; Demo & Training <span class="cat-count">5</span></h4>
+        <ul>
+          <li>library_demo<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Library-focused demo repository</span></li>
+          <li>library_java<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Library management system demo (Java)</span></li>
+          <li>contract-testing-ab<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Contract Testing info and demo</span></li>
+          <li>example-tests<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">Example tests to guide AI development</span></li>
+          <li>PLI<span style="color:var(--text-muted);font-size:0.75rem;margin-left:auto;">PL/I (Programming Language One) — legacy systems d...</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Full Repository Table -->
+  <div class="section">
+    <div class="section-title"><span class="dot pink"></span> All Repositories</div>
+    <div class="toolbar">
+      <input type="text" class="search-box" id="repoSearch" placeholder="Search repositories..." oninput="filterTable()">
+      <button class="filter-btn active" onclick="filterHealth('all', this)">All</button>
+      <button class="filter-btn" onclick="filterHealth('excellent', this)">Excellent</button>
+      <button class="filter-btn" onclick="filterHealth('good', this)">Good</button>
+      <button class="filter-btn" onclick="filterHealth('fair', this)">Fair</button>
+      <button class="filter-btn" onclick="filterHealth('poor', this)">Poor</button>
+    </div>
+    <div class="table-container">
+      <table class="repo-table" id="repoTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">Repository <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(1)">Description</th>
+            <th onclick="sortTable(2)">Languages</th>
+            <th onclick="sortTable(3)">Frameworks</th>
+            <th onclick="sortTable(4)" style="text-align:center;">Tests <span class="sort-arrow">&#9650;</span></th>
+            <th onclick="sortTable(5)" style="text-align:center;">CI/CD</th>
+            <th onclick="sortTable(6)" style="text-align:center;">Linters</th>
+            <th onclick="sortTable(7)" style="text-align:center;">Health <span class="sort-arrow">&#9650;</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/afkak" target="_blank">afkak</a></td>
+            <td class="repo-desc" title="Kafka client written in Twisted Python">Kafka client written in Twisted Python</td>
+            <td><span class="tag lang">Python</span><span class="tag lang">Shell</span></td>
+            <td><span class="tag fw">Twisted</span></td>
+            <td style="text-align:center;">20</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">100</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/anu" target="_blank">anu</a></td>
+            <td class="repo-desc" title="Immersive Visualization Toolkit for BabylonJS">Immersive Visualization Toolkit for BabylonJS</td>
+            <td><span class="tag lang">JavaScript</span><span class="tag lang">TypeScript</span></td>
+            <td><span class="tag fw">TypeScript</span><span class="tag fw">ESLint</span><span class="tag fw">Prettier</span><span class="tag fw">Vite</span></td>
+            <td style="text-align:center;">7</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">100</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/concord" target="_blank">concord</a></td>
+            <td class="repo-desc" title="Workflow orchestration and continuous deployment management">Workflow orchestration and continuous deployment management</td>
+            <td><span class="tag lang">Java</span><span class="tag lang">TypeScript</span><span class="tag lang">Shell</span></td>
+            <td><span class="tag fw">JUnit</span><span class="tag fw">Maven</span><span class="tag fw">Mockito</span></td>
+            <td style="text-align:center;">175</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">95</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/cookie-cutter" target="_blank">cookie-cutter</a></td>
+            <td class="repo-desc" title="Opinionated micro-services framework for TypeScript">Opinionated micro-services framework for TypeScript</td>
+            <td><span class="tag lang">TypeScript</span><span class="tag lang">JavaScript</span><span class="tag lang">Shell</span></td>
+            <td><span class="tag fw">Jest</span><span class="tag fw">TypeScript</span><span class="tag fw">Prettier</span></td>
+            <td style="text-align:center;">78</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">95</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/react-banking-app" target="_blank">react-banking-app</a></td>
+            <td class="repo-desc" title="Modern React banking app template — responsive, customizable">Modern React banking app template — responsive, customizable</td>
+            <td><span class="tag lang">TypeScript</span><span class="tag lang">JavaScript</span><span class="tag lang">Dockerfile</span></td>
+            <td><span class="tag fw">React</span><span class="tag fw">TypeScript</span><span class="tag fw">ESLint</span><span class="tag fw">Prettier</span></td>
+            <td style="text-align:center;">3</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">95</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/jupyter-fs" target="_blank">jupyter-fs</a></td>
+            <td class="repo-desc" title="Filesystem-like contents manager for Jupyter backends">Filesystem-like contents manager for Jupyter backends</td>
+            <td><span class="tag lang">TypeScript</span><span class="tag lang">Python</span><span class="tag lang">Jupyter Notebook</span></td>
+            <td><span class="tag fw">pytest</span><span class="tag fw">Jupyter</span></td>
+            <td style="text-align:center;">13</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">95</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/py-avro-schema" target="_blank">py-avro-schema</a></td>
+            <td class="repo-desc" title="Generate Apache Avro schemas for Python types">Generate Apache Avro schemas for Python types</td>
+            <td><span class="tag lang">Python</span></td>
+            <td><span class="tag fw">pytest</span><span class="tag fw">Pydantic</span><span class="tag fw">Apache Avro</span></td>
+            <td style="text-align:center;">8</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">95</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/mamba" target="_blank">mamba</a></td>
+            <td class="repo-desc" title="Swift iOS/tvOS/macOS framework for HLS data parsing">Swift iOS/tvOS/macOS framework for HLS data parsing</td>
+            <td><span class="tag lang">Swift</span><span class="tag lang">C</span></td>
+            <td><span class="tag fw">Swift Package Manager</span></td>
+            <td style="text-align:center;">66</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">85</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/android-groceries-store" target="_blank">android-groceries-store</a></td>
+            <td class="repo-desc" title="Android Groceries Store app with modern dev skills">Android Groceries Store app with modern dev skills</td>
+            <td><span class="tag lang">Kotlin</span><span class="tag lang">SQL</span><span class="tag lang">Groovy</span></td>
+            <td><span class="tag fw">JUnit</span><span class="tag fw">Maven</span><span class="tag fw">Gradle</span><span class="tag fw">Jetpack Compose</span></td>
+            <td style="text-align:center;">14</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">85</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/docker-compose" target="_blank">docker-compose</a></td>
+            <td class="repo-desc" title="Define and run multi-container Docker applications">Define and run multi-container Docker applications</td>
+            <td><span class="tag lang">Go</span><span class="tag lang">Dockerfile</span><span class="tag lang">Shell</span></td>
+            <td><span class="tag fw">Go Modules</span><span class="tag fw">Cobra</span><span class="tag fw">Testify</span><span class="tag fw">Docker</span></td>
+            <td style="text-align:center;">97</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">85</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/erpnext" target="_blank">erpnext</a></td>
+            <td class="repo-desc" title="Free and Open Source Enterprise Resource Planning (ERP)">Free and Open Source Enterprise Resource Planning (ERP)</td>
+            <td><span class="tag lang">Python</span><span class="tag lang">JavaScript</span><span class="tag lang">Go</span></td>
+            <td><span class="tag fw">Frappe</span></td>
+            <td style="text-align:center;">399</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">85</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/ip4s" target="_blank">ip4s</a></td>
+            <td class="repo-desc" title="Immutable, safe data structures for IP addresses & network types">Immutable, safe data structures for IP addresses & network types</td>
+            <td><span class="tag lang">Scala</span></td>
+            <td><span class="tag fw">Cats (Scala)</span></td>
+            <td style="text-align:center;">18</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">80</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/library_demo" target="_blank">library_demo</a></td>
+            <td class="repo-desc" title="Library-focused demo repository">Library-focused demo repository</td>
+            <td><span class="tag lang">Java</span><span class="tag lang">Groovy</span><span class="tag lang">SQL</span></td>
+            <td><span class="tag fw">Spring</span><span class="tag fw">JUnit</span><span class="tag fw">Maven</span><span class="tag fw">Docker</span></td>
+            <td style="text-align:center;">33</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">80</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/library_java" target="_blank">library_java</a></td>
+            <td class="repo-desc" title="Library management system demo (Java)">Library management system demo (Java)</td>
+            <td><span class="tag lang">Java</span><span class="tag lang">Groovy</span><span class="tag lang">SQL</span></td>
+            <td><span class="tag fw">Spring</span><span class="tag fw">JUnit</span><span class="tag fw">Maven</span><span class="tag fw">Docker</span></td>
+            <td style="text-align:center;">35</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">80</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/closetalk.app" target="_blank">closetalk.app</a></td>
+            <td class="repo-desc" title="Chat App: Android, Kotlin, Jetpack Compose, MVI, Koin">Chat App: Android, Kotlin, Jetpack Compose, MVI, Koin</td>
+            <td><span class="tag lang">Kotlin</span><span class="tag lang">Shell</span></td>
+            <td><span class="tag fw">JUnit</span><span class="tag fw">Gradle</span><span class="tag fw">Jetpack Compose</span></td>
+            <td style="text-align:center;">2</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">80</span></td>
+          </tr>
+          <tr data-health="excellent">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/unsafe" target="_blank">unsafe</a></td>
+            <td class="repo-desc" title="Java classes using sun.misc.Unsafe">Java classes using sun.misc.Unsafe</td>
+            <td><span class="tag lang">Java</span></td>
+            <td><span class="tag fw">JUnit</span><span class="tag fw">Maven</span></td>
+            <td style="text-align:center;">13</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge excellent">80</span></td>
+          </tr>
+          <tr data-health="good">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/att-rcloud" target="_blank">att-rcloud</a></td>
+            <td class="repo-desc" title="Collaborative data analysis and visualization">Collaborative data analysis and visualization</td>
+            <td><span class="tag lang">JavaScript</span><span class="tag lang">R</span><span class="tag lang">Shell</span></td>
+            <td><span class="tag fw">ESLint</span></td>
+            <td style="text-align:center;">1</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge good">75</span></td>
+          </tr>
+          <tr data-health="good">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/bank-client" target="_blank">bank-client</a></td>
+            <td class="repo-desc" title="Frontend: React.js, Hooks, Redux, Saga, Ant Design, Jest">Frontend: React.js, Hooks, Redux, Saga, Ant Design, Jest</td>
+            <td><span class="tag lang">JavaScript</span></td>
+            <td><span class="tag fw">React</span><span class="tag fw">Express</span><span class="tag fw">Redux</span><span class="tag fw">TypeScript</span></td>
+            <td style="text-align:center;">137</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge good">75</span></td>
+          </tr>
+          <tr data-health="good">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/xGitGuard" target="_blank">xGitGuard</a></td>
+            <td class="repo-desc" title="AI-based Secrets Detection Python Framework">AI-based Secrets Detection Python Framework</td>
+            <td><span class="tag lang">Python</span></td>
+            <td><span class="tag fw">pandas</span><span class="tag fw">NumPy</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge good">65</span></td>
+          </tr>
+          <tr data-health="good">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/cics-banking-sample-application-cbsa" target="_blank">cics-banking-sample-application-cbsa</a></td>
+            <td class="repo-desc" title="CICS banking sample application (COBOL)">CICS banking sample application (COBOL)</td>
+            <td><span class="tag lang">COBOL</span><span class="tag lang">Java</span><span class="tag lang">JavaScript</span></td>
+            <td><span class="tag fw">Spring</span><span class="tag fw">Maven</span></td>
+            <td style="text-align:center;">3</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge good">65</span></td>
+          </tr>
+          <tr data-health="good">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/metasfresh" target="_blank">metasfresh</a></td>
+            <td class="repo-desc" title="Open Source ERP — Fast, Flexible & Free Software">Open Source ERP — Fast, Flexible & Free Software</td>
+            <td><span class="tag lang">Java</span><span class="tag lang">SQL</span><span class="tag lang">JavaScript</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">4808</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge good">65</span></td>
+          </tr>
+          <tr data-health="good">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/windsurf-demo" target="_blank">windsurf-demo</a></td>
+            <td class="repo-desc" title="Learn hands on how to use the Windsurf Editor">Learn hands on how to use the Windsurf Editor</td>
+            <td><span class="tag lang">JavaScript</span><span class="tag lang">Python</span></td>
+            <td><span class="tag fw">Jest</span><span class="tag fw">Babel</span><span class="tag fw">Flask</span><span class="tag fw">NumPy</span></td>
+            <td style="text-align:center;">3</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge good">60</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/bank-server" target="_blank">bank-server</a></td>
+            <td class="repo-desc" title="Backend with double-entry bookkeeping — NestJS, REST, PostgreSQL">Backend with double-entry bookkeeping — NestJS, REST, PostgreSQL</td>
+            <td><span class="tag lang">TypeScript</span><span class="tag lang">JavaScript</span></td>
+            <td><span class="tag fw">NestJS</span><span class="tag fw">Jest</span><span class="tag fw">TypeScript</span><span class="tag fw">ESLint</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">55</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/iac" target="_blank">iac</a></td>
+            <td class="repo-desc" title="Infrastructure as Code repository">Infrastructure as Code repository</td>
+            <td><span class="tag lang">JavaScript</span><span class="tag lang">Terraform</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-yes">Yes</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">55</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/pih-pentaho" target="_blank">pih-pentaho</a></td>
+            <td class="repo-desc" title="PIH Pentaho ETL configuration (Dockerfile-based)">PIH Pentaho ETL configuration (Dockerfile-based)</td>
+            <td><span class="tag lang">SQL</span><span class="tag lang">Dockerfile</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">3</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">50</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/my_flutter_app" target="_blank">my_flutter_app</a></td>
+            <td class="repo-desc" title="Flutter mobile application">Flutter mobile application</td>
+            <td><span class="tag lang">Dart</span><span class="tag lang">C++</span><span class="tag lang">C</span></td>
+            <td><span class="tag fw">Flutter</span><span class="tag fw">Flutter Test</span></td>
+            <td style="text-align:center;">17</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">50</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/HoneywellSecurityMQTT" target="_blank">HoneywellSecurityMQTT</a></td>
+            <td class="repo-desc" title="MQTT integration for Honeywell wireless security sensors">MQTT integration for Honeywell wireless security sensors</td>
+            <td><span class="tag lang">C++</span><span class="tag lang">C</span><span class="tag lang">Shell</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">4</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">50</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/coldfusion-minute" target="_blank">coldfusion-minute</a></td>
+            <td class="repo-desc" title="ColdFusion examples: DB access, ORM, JSON/XML APIs">ColdFusion examples: DB access, ORM, JSON/XML APIs</td>
+            <td><span class="tag lang">ColdFusion</span><span class="tag lang">JavaScript</span><span class="tag lang">SQL</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">52</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">45</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/etl-python" target="_blank">etl-python</a></td>
+            <td class="repo-desc" title="Simple ETL example in Python">Simple ETL example in Python</td>
+            <td><span class="tag lang">Jupyter Notebook</span><span class="tag lang">Python</span></td>
+            <td><span class="tag fw">pytest</span><span class="tag fw">pandas</span></td>
+            <td style="text-align:center;">1</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">45</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/att-ast" target="_blank">att-ast</a></td>
+            <td class="repo-desc" title="AST - AT&T Software Technology">AST - AT&T Software Technology</td>
+            <td><span class="tag lang">C</span><span class="tag lang">Shell</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">39</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">45</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/ETL4HiveOraTera" target="_blank">ETL4HiveOraTera</a></td>
+            <td class="repo-desc" title="ETL scripts for Hive-Oracle-Teradata using PySpark">ETL scripts for Hive-Oracle-Teradata using PySpark</td>
+            <td><span class="tag lang">Jupyter Notebook</span><span class="tag lang">Python</span><span class="tag lang">Shell</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">3</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">40</span></td>
+          </tr>
+          <tr data-health="fair">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/js2model" target="_blank">js2model</a></td>
+            <td class="repo-desc" title="JSON Schema to model code generator (C++)">JSON Schema to model code generator (C++)</td>
+            <td><span class="tag lang">C</span><span class="tag lang">Python</span><span class="tag lang">C++</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">13</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge fair">40</span></td>
+          </tr>
+          <tr data-health="poor">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/contract-testing-ab" target="_blank">contract-testing-ab</a></td>
+            <td class="repo-desc" title="Contract Testing info and demo">Contract Testing info and demo</td>
+            <td><span class="tag lang">JavaScript</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">1</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge poor">35</span></td>
+          </tr>
+          <tr data-health="poor">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/ab-demo" target="_blank">ab-demo</a></td>
+            <td class="repo-desc" title="Alex Baker's demo repository">Alex Baker's demo repository</td>
+            <td><span class="tag lang">Python</span></td>
+            <td><span class="tag fw">Flask</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge poor">30</span></td>
+          </tr>
+          <tr data-health="poor">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/python-training" target="_blank">python-training</a></td>
+            <td class="repo-desc" title="Python training for business analysts and traders">Python training for business analysts and traders</td>
+            <td><span class="tag lang">Jupyter Notebook</span><span class="tag lang">Python</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge poor">30</span></td>
+          </tr>
+          <tr data-health="poor">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/TR-FEF" target="_blank">TR-FEF</a></td>
+            <td class="repo-desc" title="Thomson Reuters Front End Framework (HTML rich apps)">Thomson Reuters Front End Framework (HTML rich apps)</td>
+            <td><span class="tag lang">JavaScript</span><span class="tag lang">TypeScript</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">15</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge poor">25</span></td>
+          </tr>
+          <tr data-health="poor">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/PLI" target="_blank">PLI</a></td>
+            <td class="repo-desc" title="PL/I (Programming Language One) — legacy systems deep dive">PL/I (Programming Language One) — legacy systems deep dive</td>
+            <td><span class="tag lang">PL/I</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge poor">25</span></td>
+          </tr>
+          <tr data-health="poor">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/banking-oss" target="_blank">banking-oss</a></td>
+            <td class="repo-desc" title="Open source banking web app — React.js and Node.js">Open source banking web app — React.js and Node.js</td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge poor">25</span></td>
+          </tr>
+          <tr data-health="poor">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/oracle-cdc-to-data-lake" target="_blank">oracle-cdc-to-data-lake</a></td>
+            <td class="repo-desc" title="Oracle CDC to Data Lake pipeline">Oracle CDC to Data Lake pipeline</td>
+            <td><span class="tag lang">Shell</span><span class="tag lang">SQL</span></td>
+            <td><span class="tag fw">Docker</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge poor">20</span></td>
+          </tr>
+          <tr data-health="poor">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/ETL_Oracle_to_Hadoop_DataLake" target="_blank">ETL_Oracle_to_Hadoop_DataLake</a></td>
+            <td class="repo-desc" title="ETL Pipeline: Oracle to Hadoop DataLake on PySpark">ETL Pipeline: Oracle to Hadoop DataLake on PySpark</td>
+            <td><span class="tag lang">Scala</span><span class="tag lang">Shell</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge poor">15</span></td>
+          </tr>
+          <tr data-health="poor">
+            <td class="repo-name"><a href="https://github.com/alex-baker-cdm/example-tests" target="_blank">example-tests</a></td>
+            <td class="repo-desc" title="Example tests to guide AI development">Example tests to guide AI development</td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td><span style="color:var(--text-muted);">—</span></td>
+            <td style="text-align:center;">0</td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="bool-no">No</span></td>
+            <td style="text-align:center;"><span class="health-badge poor">15</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    Repository Portfolio Dashboard &bull; Generated by Devin &bull; April 2026
+  </div>
+</div>
+
+<script>
+// === Chart Data ===
+const langNames = ["Java", "SQL", "C", "JavaScript", "Python", "TypeScript", "Shell", "Go", "ColdFusion", "Jupyter Notebook", "COBOL", "Swift"];
+const langLines = [4040431, 2791042, 740340, 555469, 373771, 104793, 59955, 49429, 32057, 27547, 27235, 22652];
+const langFilesCounts = [24445, 13610, 2181, 2764, 2740, 1104, 323, 302, 239, 28, 66, 166];
+const langRepoCounts = [6, 8, 6, 16, 14, 9, 16, 2, 1, 4, 1, 2];
+const pieLangLabels = ["Java", "SQL", "C", "JavaScript", "Python", "TypeScript", "Shell", "Go", "Others"];
+const pieLangValues = [4040431, 2791042, 740340, 555469, 373771, 104793, 59955, 49429, 154497];
+const fwNames = ["JUnit", "Maven", "TypeScript", "Prettier", "ESLint", "Docker", "Spring", "Jest", "pytest", "pandas", "NumPy", "Mockito", "Gradle", "Jetpack Compose", "Flask", "Babel", "React", "Cats (Scala)", "Twisted", "Swift Package Manager"];
+const fwCounts = [6, 6, 5, 5, 5, 4, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1];
+const testRepoNames = ["metasfresh", "erpnext", "concord", "bank-client", "docker-compose", "cookie-cutter", "mamba", "coldfusion-minute", "att-ast", "library_java", "library_demo", "afkak", "ip4s", "my_flutter_app", "TR-FEF"];
+const testFileCounts = [4808, 399, 175, 137, 97, 78, 66, 52, 39, 35, 33, 20, 18, 17, 15];
+const testLineCounts = [517997, 112049, 24851, 6329, 13652, 15672, 12684, 7959, 15789, 2267, 2086, 10598, 946, 2778, 536];
+const healthDist = [16, 6, 10, 9];
+
+const COLORS = {
+  blue: '#3b82f6', purple: '#8b5cf6', green: '#10b981',
+  yellow: '#f59e0b', red: '#ef4444', cyan: '#06b6d4',
+  pink: '#ec4899', orange: '#f97316', indigo: '#6366f1',
+  teal: '#14b8a6', lime: '#84cc16', amber: '#f59e0b',
+  rose: '#f43f5e', sky: '#0ea5e9', violet: '#7c3aed',
+  fuchsia: '#d946ef', emerald: '#059669', slate: '#64748b'
+};
+
+const palette = [COLORS.blue, COLORS.purple, COLORS.green, COLORS.yellow, COLORS.cyan,
+  COLORS.pink, COLORS.orange, COLORS.indigo, COLORS.teal, COLORS.lime,
+  COLORS.amber, COLORS.rose, COLORS.sky, COLORS.violet, COLORS.fuchsia,
+  COLORS.emerald, COLORS.slate, COLORS.red];
+
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = 'rgba(51,65,85,0.5)';
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+// --- Language Bar Chart ---
+new Chart(document.getElementById('langBarChart'), {
+  type: 'bar',
+  data: {
+    labels: langNames,
+    datasets: [{
+      label: 'Lines of Code',
+      data: langLines,
+      backgroundColor: palette.slice(0, langNames.length).map(c => c + '88'),
+      borderColor: palette.slice(0, langNames.length),
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            const i = ctx.dataIndex;
+            return `${ctx.parsed.x.toLocaleString()} lines | ${langFilesCounts[i]} files | ${langRepoCounts[i]} repos`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v },
+        grid: { color: 'rgba(51,65,85,0.3)' }
+      },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// --- Language Pie Chart ---
+new Chart(document.getElementById('langPieChart'), {
+  type: 'doughnut',
+  data: {
+    labels: pieLangLabels,
+    datasets: [{
+      data: pieLangValues,
+      backgroundColor: palette.slice(0, pieLangLabels.length),
+      borderColor: '#1e293b',
+      borderWidth: 2,
+      hoverOffset: 8,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '55%',
+    plugins: {
+      legend: { position: 'right', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle' } },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+            const pct = ((ctx.parsed / total) * 100).toFixed(1);
+            return `${ctx.label}: ${ctx.parsed.toLocaleString()} lines (${pct}%)`;
+          }
+        }
+      }
+    }
+  }
+});
+
+// --- Frameworks Chart ---
+new Chart(document.getElementById('fwChart'), {
+  type: 'bar',
+  data: {
+    labels: fwNames,
+    datasets: [{
+      label: 'Repos using',
+      data: fwCounts,
+      backgroundColor: fwNames.map((_, i) => palette[i % palette.length] + '88'),
+      borderColor: fwNames.map((_, i) => palette[i % palette.length]),
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => `Used in ${ctx.parsed.y} repo(s)`
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { stepSize: 1 },
+        grid: { color: 'rgba(51,65,85,0.3)' }
+      },
+      x: {
+        ticks: { maxRotation: 45, minRotation: 30 },
+        grid: { display: false }
+      }
+    }
+  }
+});
+
+// --- Test Files Chart ---
+new Chart(document.getElementById('testChart'), {
+  type: 'bar',
+  data: {
+    labels: testRepoNames,
+    datasets: [
+      {
+        label: 'Test Files',
+        data: testFileCounts,
+        backgroundColor: COLORS.cyan + '88',
+        borderColor: COLORS.cyan,
+        borderWidth: 1,
+        borderRadius: 4,
+      }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'top' },
+      tooltip: {
+        callbacks: {
+          afterLabel: function(ctx) {
+            return `${testLineCounts[ctx.dataIndex].toLocaleString()} lines of test code`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(51,65,85,0.3)' }
+      },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// --- Health Distribution Chart ---
+new Chart(document.getElementById('healthDistChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Excellent (80-100)', 'Good (60-79)', 'Fair (40-59)', 'Poor (0-39)'],
+    datasets: [{
+      data: healthDist,
+      backgroundColor: [COLORS.green, COLORS.blue, COLORS.yellow, COLORS.red],
+      borderColor: '#1e293b',
+      borderWidth: 3,
+      hoverOffset: 8,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '55%',
+    plugins: {
+      legend: { position: 'right', labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' } },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+            const pct = ((ctx.parsed / total) * 100).toFixed(0);
+            return `${ctx.label}: ${ctx.parsed} repos (${pct}%)`;
+          }
+        }
+      }
+    }
+  }
+});
+
+// === Table Filtering ===
+let activeHealthFilter = 'all';
+
+function filterTable() {
+  const q = document.getElementById('repoSearch').value.toLowerCase();
+  const rows = document.querySelectorAll('#repoTable tbody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const health = row.getAttribute('data-health');
+    const matchSearch = text.includes(q);
+    const matchHealth = activeHealthFilter === 'all' || health === activeHealthFilter;
+    row.style.display = (matchSearch && matchHealth) ? '' : 'none';
+  });
+}
+
+function filterHealth(level, btn) {
+  activeHealthFilter = level;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterTable();
+}
+
+// === Table Sorting ===
+let sortCol = -1, sortAsc = true;
+function sortTable(col) {
+  const table = document.getElementById('repoTable');
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  if (sortCol === col) { sortAsc = !sortAsc; } else { sortCol = col; sortAsc = true; }
+
+  rows.sort((a, b) => {
+    let aVal = a.children[col].textContent.trim();
+    let bVal = b.children[col].textContent.trim();
+    // Try numeric
+    const aNum = parseFloat(aVal);
+    const bNum = parseFloat(bVal);
+    if (!isNaN(aNum) && !isNaN(bNum)) {
+      return sortAsc ? aNum - bNum : bNum - aNum;
+    }
+    return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+  });
+
+  rows.forEach(r => tbody.appendChild(r));
+}
+</script>
+</body>
+</html>
