@@ -11,6 +11,7 @@ import Savings from '../pages/Savings';
 import SendMoney from '../pages/SendMoney';
 import Analytics from '../pages/Analytics';
 import Notifications from '../pages/Notifications';
+import Statements from '../pages/Statements';
 import Transactions from '../pages/Transactions';
 
 const Navigation: React.FC = () => (
@@ -25,6 +26,7 @@ const Navigation: React.FC = () => (
     <Route path='/send' element={<SendMoney />} />
     <Route path='/analytics' element={<Analytics />} />
     <Route path='/notifications' element={<Notifications />} />
+    <Route path='/statements' element={<Statements />} />
     <Route path='/transactions' element={<Transactions />} />
   </Routes>
 );
