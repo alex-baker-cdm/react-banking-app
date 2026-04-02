@@ -203,6 +203,21 @@ header .header-button:first-child {
   margin-right: 10px;
 }
 
+header .header-button .badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  font-size: 0.6em;
+  font-weight: 600;
+  border-radius: 50%;
+  background-color: red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 header .header-button span {
   line-height: 0;
   color: #ffffff;
