@@ -701,6 +701,18 @@ footer {
   }
 }
 
+.status-badge {
+  font-size: 0.7em;
+  padding: 2px 8px;
+  border-radius: 50em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.status-badge.due-soon { background-color: rgba(255, 152, 0, 0.3); color: #ff9800; }
+.status-badge.scheduled { background-color: rgba(10, 86, 234, 0.3); color: #4a9eff; }
+.status-badge.paid { background-color: rgba(78, 211, 78, 0.3); color: #4ed34e; }
+.status-badge.overdue { background-color: rgba(244, 45, 83, 0.3); color: #f42d53; }
+
 @media (max-width: 550px) {
   body,
   html,
