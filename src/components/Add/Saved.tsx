@@ -1,4 +1,15 @@
-const Saved: React.FC = () => (
+// interfaces
+interface PaymentSource {
+  bank: string;
+  card: string;
+}
+
+interface IProps {
+  source: PaymentSource;
+  onChangeSource: () => void;
+}
+
+const Saved: React.FC<IProps> = ({ source, onChangeSource }) => (
   <div className='accounts flex flex-v-center flex-space-between'>
     <div className='account-icon flex flex-1'>
       <div className='account-circle flex flex-h-center flex-v-center'>
@@ -11,11 +22,13 @@ const Saved: React.FC = () => (
       </div>
     </div>
     <div className='account-details flex flex-col'>
-      <span className='account-bank'>HSBC BANK UK.</span>
-      <span className='account-card'>VISA - 9075</span>
+      <span className='account-bank'>{source.bank}</span>
+      <span className='account-card'>{source.card}</span>
     </div>
     <div className='account-buttons flex flex-1'>
-      <button type='button'>Change</button>
+      <button type='button' onClick={onChangeSource}>
+        Change
+      </button>
     </div>
   </div>
 );
