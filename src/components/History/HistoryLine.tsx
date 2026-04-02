@@ -2,7 +2,7 @@
 import Circle from '../Circle/Circle';
 
 // interfaces
-interface IData {
+export interface ITransaction {
   id: number;
   icon: string;
   name: string;
@@ -10,10 +10,11 @@ interface IData {
   color: string;
   amount: number;
   currencySymbol: string;
+  category: string;
 }
 
 interface IProps {
-  item: IData;
+  item: ITransaction;
 }
 
 const HistoryLine: React.FC<IProps> = ({ item }) => (
