@@ -9,6 +9,11 @@ Are you ready to revolutionize the world of online banking? This template is des
 - **Customizable**: Tailor the template to fit your brand's unique style and needs.
 - **Easy Integration**: Integrate with your existing banking systems or third-party services with ease.
 
+**Prerequisites**
+
+- [Node.js](https://nodejs.org/) >= 22.0.0 (LTS recommended)
+- npm >= 10.0.0 or [Yarn](https://yarnpkg.com/)
+
 **Get Started**
 
 Whether you're a seasoned developer or just starting out, this template provides a solid foundation for your project. Follow the simple installation steps to get up and running quickly.

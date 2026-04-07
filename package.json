@@ -2,6 +2,10 @@
   "name": "banking-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
   "dependencies": {
     "@sentry/react": "^10.38.0",
     "react": "^19.2.1",
