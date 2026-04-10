@@ -23,6 +23,13 @@
       "react-app"
     ]
   },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router-dom$": "react-router-dom/dist/index.js",
+      "^react-router$": "react-router/dist/development/index.js",
+      "^react-router/dom$": "react-router-dom/dist/index.js"
+    }
+  },
   "browserslist": {
     "production": [
       ">0.2%",

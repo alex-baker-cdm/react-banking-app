@@ -1,93 +1,106 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // components
 import Layout from '../components/Layout/Layout';
 import Divider from '../components/Divider/Divider';
 
-const Profile: React.FC = () => (
-  <Layout>
-    <Divider />
+// context
+import { useAuth } from '../context/AuthContext';
 
-    <h1 className='title'>Profile</h1>
+const Profile: React.FC = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
-    <div className='account-photo' style={{ backgroundImage: `url("images/profile.jpg")` }} />
+  const handleSignOut = (): void => {
+    logout();
+    navigate('/', { replace: true });
+  };
 
-    <div className='center'>
-      <h2>Cenk SARI</h2>
-      <p className='flex flex-v-center flex-h-center'>
-        @cenksari &nbsp;
-        <span className='material-symbols-outlined'>qr_code</span>
-      </p>
-    </div>
+  return (
+    <Layout>
+      <Divider />
 
-    <Divider />
+      <h1 className='title'>Profile</h1>
 
-    <div className='account'>
-      <Link to='/profile' className='flex flex-v-center'>
-        <span className='material-symbols-outlined'>support</span>
-        Help
-      </Link>
-      <Link to='/profile' className='flex flex-v-center'>
-        <span className='material-symbols-outlined'>account_circle</span>
-        Account
-      </Link>
-      <Link to='/profile' className='flex flex-v-center'>
-        <span className='material-symbols-outlined'>school</span>
-        Learn
-      </Link>
-      <Link to='/profile' className='flex flex-v-center flex-space-between'>
-        <div className='flex flex-v-center flex-h-center'>
-          <span className='material-symbols-outlined'>inbox</span>
-          Inbox
-        </div>
-        <span className='notification flex flex-v-center flex-h-center'>4</span>
-      </Link>
-    </div>
+      <div className='account-photo' style={{ backgroundImage: `url("images/profile.jpg")` }} />
 
-    <Divider />
+      <div className='center'>
+        <h2>Cenk SARI</h2>
+        <p className='flex flex-v-center flex-h-center'>
+          @cenksari &nbsp;
+          <span className='material-symbols-outlined'>qr_code</span>
+        </p>
+      </div>
 
-    <div className='account'>
-      <Link to='/profile' className='flex flex-v-center'>
-        <span className='material-symbols-outlined'>verified_user</span>
-        Security &amp; privacy
-      </Link>
-      <Link to='/profile' className='flex flex-v-center'>
-        <span className='material-symbols-outlined'>notifications</span>
-        Notification settings
-      </Link>
-      <Link to='/profile' className='flex flex-v-center'>
-        <span className='material-symbols-outlined'>contrast</span>
-        Appearance
-      </Link>
-      <Link to='/profile' className='flex flex-v-center'>
-        <span className='material-symbols-outlined'>grade</span>
-        New features
-      </Link>
-    </div>
+      <Divider />
 
-    <Divider />
+      <div className='account'>
+        <Link to='/profile' className='flex flex-v-center'>
+          <span className='material-symbols-outlined'>support</span>
+          Help
+        </Link>
+        <Link to='/profile' className='flex flex-v-center'>
+          <span className='material-symbols-outlined'>account_circle</span>
+          Account
+        </Link>
+        <Link to='/profile' className='flex flex-v-center'>
+          <span className='material-symbols-outlined'>school</span>
+          Learn
+        </Link>
+        <Link to='/profile' className='flex flex-v-center flex-space-between'>
+          <div className='flex flex-v-center flex-h-center'>
+            <span className='material-symbols-outlined'>inbox</span>
+            Inbox
+          </div>
+          <span className='notification flex flex-v-center flex-h-center'>4</span>
+        </Link>
+      </div>
 
-    <div className='account'>
-      <Link to='/profile' className='flex flex-v-center'>
-        <span className='material-symbols-outlined'>token</span>
-        About us
-      </Link>
-      <Link to='/profile' className='flex flex-v-center'>
-        <span className='material-symbols-outlined'>power_settings_new</span>
-        Sign out
-      </Link>
-    </div>
+      <Divider />
 
-    <Divider />
+      <div className='account'>
+        <Link to='/profile' className='flex flex-v-center'>
+          <span className='material-symbols-outlined'>verified_user</span>
+          Security &amp; privacy
+        </Link>
+        <Link to='/profile' className='flex flex-v-center'>
+          <span className='material-symbols-outlined'>notifications</span>
+          Notification settings
+        </Link>
+        <Link to='/profile' className='flex flex-v-center'>
+          <span className='material-symbols-outlined'>contrast</span>
+          Appearance
+        </Link>
+        <Link to='/profile' className='flex flex-v-center'>
+          <span className='material-symbols-outlined'>grade</span>
+          New features
+        </Link>
+      </div>
 
-    <footer className='center no-select'>
-      v.1.0.12
-      <br />
-      Banking Ltd.
-    </footer>
+      <Divider />
 
-    <Divider />
-  </Layout>
-);
+      <div className='account'>
+        <Link to='/profile' className='flex flex-v-center'>
+          <span className='material-symbols-outlined'>token</span>
+          About us
+        </Link>
+        <button onClick={handleSignOut} className='flex flex-v-center sign-out-button'>
+          <span className='material-symbols-outlined'>power_settings_new</span>
+          Sign out
+        </button>
+      </div>
+
+      <Divider />
+
+      <footer className='center no-select'>
+        v.1.0.12
+        <br />
+        Banking Ltd.
+      </footer>
+
+      <Divider />
+    </Layout>
+  );
+};
 
 export default Profile;

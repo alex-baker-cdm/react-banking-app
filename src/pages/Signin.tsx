@@ -6,10 +6,16 @@ import { Sentry } from '../sentry';
 import Input from '../components/Form/Input';
 import Button from '../components/Form/Button';
 
+// context
+import { useAuth } from '../context/AuthContext';
+
 const Signin: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   /**
    * Validates an email address format.
@@ -29,6 +35,22 @@ const Signin: React.FC = () => {
   };
 
   /**
+   * Validates a password.
+   *
+   * @param {string} password - The password to validate.
+   * @returns {string} Error message if invalid, empty string if valid.
+   */
+  const validatePassword = (password: string): string => {
+    if (!password) {
+      return 'Password is required';
+    }
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    return '';
+  };
+
+  /**
    * Handles email input change and validates the email.
    *
    * @param {React.ChangeEvent<HTMLInputElement>} e - The input change event.
@@ -40,6 +62,17 @@ const Signin: React.FC = () => {
   };
 
   /**
+   * Handles password input change and clears the error.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The input change event.
+   */
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setPassword(value);
+    setPasswordError('');
+  };
+
+  /**
    * Handles the form submission event by preventing the default behavior and navigating to the home page.
    *
    * @param {React.FormEvent} e - The form submission event.
@@ -47,16 +80,23 @@ const Signin: React.FC = () => {
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
 
-    const error = validateEmail(email);
-    if (error) {
-      setEmailError(error);
-      Sentry.captureMessage(`Email validation error: ${error}`, {
+    const emailErr = validateEmail(email);
+    if (emailErr) {
+      setEmailError(emailErr);
+      Sentry.captureMessage(`Email validation error: ${emailErr}`, {
         level: 'warning',
         extra: { email },
       });
       return;
     }
 
+    const passwordErr = validatePassword(password);
+    if (passwordErr) {
+      setPasswordError(passwordErr);
+      return;
+    }
+
+    login(email);
     navigate('/home', { replace: true });
   };
 
@@ -100,8 +140,11 @@ const Signin: React.FC = () => {
               tabIndex={0}
               name='password'
               type='password'
+              value={password}
               autoComplete={false}
               placeholder='Please enter your password'
+              error={passwordError}
+              onChange={handlePasswordChange}
             />
           </div>
           <div className='form-line'>
