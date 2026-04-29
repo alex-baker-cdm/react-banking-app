@@ -18,6 +18,7 @@ const SendMoney: React.FC = () => {
   const [step, setStep] = useState<number>(1);
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
   const [amount, setAmount] = useState<number>(0);
+  const [transferError, setTransferError] = useState<string | null>(null);
 
   const handleSelectRecipient = (recipient: Recipient): void => {
     setSelectedRecipient(recipient);
@@ -31,6 +32,7 @@ const SendMoney: React.FC = () => {
 
   const handleConfirm = (): void => {
     if (selectedRecipient) {
+      setTransferError(null);
       try {
         processTransfer({
           amount,
@@ -50,6 +52,7 @@ const SendMoney: React.FC = () => {
             recipientAccount: selectedRecipient.accountInfo,
           },
         });
+        setTransferError('Transfer failed. Please try again.');
       }
     }
   };
@@ -87,13 +90,20 @@ const SendMoney: React.FC = () => {
       )}
 
       {step === 3 && selectedRecipient && (
-        <TransferConfirmation
-          recipientName={selectedRecipient.name}
-          recipientAccountInfo={selectedRecipient.accountInfo}
-          amount={amount}
-          onConfirm={handleConfirm}
-          onCancel={handleCancel}
-        />
+        <>
+          <TransferConfirmation
+            recipientName={selectedRecipient.name}
+            recipientAccountInfo={selectedRecipient.accountInfo}
+            amount={amount}
+            onConfirm={handleConfirm}
+            onCancel={handleCancel}
+          />
+          {transferError && (
+            <p className='input-error-message' style={{ textAlign: 'center', marginTop: '10px' }}>
+              {transferError}
+            </p>
+          )}
+        </>
       )}
 
       {step === 4 && selectedRecipient && (
