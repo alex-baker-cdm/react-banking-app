@@ -38,6 +38,9 @@
   "resolutions": {
     "node-forge": "^1.3.2"
   },
+  "overrides": {
+    "jsonpath": ">=1.3.0"
+  },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
