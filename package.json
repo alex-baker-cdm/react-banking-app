@@ -35,6 +35,9 @@
       "last 1 safari version"
     ]
   },
+  "overrides": {
+    "jsonpath": ">=1.3.0"
+  },
   "resolutions": {
     "node-forge": "^1.3.2"
   },
