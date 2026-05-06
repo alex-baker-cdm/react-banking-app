@@ -16,15 +16,10 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
 
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => !n.read).length,
-    [notifications],
-  );
+  const unreadCount = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
 
   const markAsRead = useCallback((id: number) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   }, []);
 
   const markAllAsRead = useCallback(() => {
@@ -36,19 +31,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (category === 'all') return notifications;
       return notifications.filter((n) => n.category === category);
     },
-    [notifications],
+    [notifications]
   );
 
   const value = useMemo(
     () => ({ notifications, unreadCount, markAsRead, markAllAsRead, filterByCategory }),
-    [notifications, unreadCount, markAsRead, markAllAsRead, filterByCategory],
+    [notifications, unreadCount, markAsRead, markAllAsRead, filterByCategory]
   );
 
-  return (
-    <NotificationContext.Provider value={value}>
-      {children}
-    </NotificationContext.Provider>
-  );
+  return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 };
 
 export const useNotifications = (): NotificationContextType => {

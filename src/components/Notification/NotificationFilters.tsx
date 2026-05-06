@@ -21,7 +21,9 @@ const NotificationFilters: React.FC<IProps> = ({ active, onFilter }) => (
         key={f.value}
         type='button'
         className={`notification-filter${active === f.value ? ' active' : ''}`}
-        onClick={() => { onFilter(f.value); }}
+        onClick={() => {
+          onFilter(f.value);
+        }}
       >
         {f.label}
       </button>

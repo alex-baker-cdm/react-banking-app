@@ -20,13 +20,11 @@ const Notifications: React.FC = () => {
       <Divider />
 
       <div className='flex flex-v-center flex-space-between'>
-        <h1 className='title no-select' style={{ marginBottom: 0 }}>Notifications</h1>
+        <h1 className='title no-select' style={{ marginBottom: 0 }}>
+          Notifications
+        </h1>
         {unreadCount > 0 && (
-          <button
-            type='button'
-            className='mark-all-read'
-            onClick={markAllAsRead}
-          >
+          <button type='button' className='mark-all-read' onClick={markAllAsRead}>
             Mark all as read
           </button>
         )}

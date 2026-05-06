@@ -10,8 +10,12 @@ const NotificationItem: React.FC<IProps> = ({ notification, onTap }) => (
     role='button'
     tabIndex={0}
     className={`notification-item flex flex-v-center${!notification.read ? ' unread' : ''}`}
-    onClick={() => { onTap(notification.id); }}
-    onKeyDown={(e) => { if (e.key === 'Enter') onTap(notification.id); }}
+    onClick={() => {
+      onTap(notification.id);
+    }}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter') onTap(notification.id);
+    }}
   >
     <div className='notification-item-icon flex flex-v-center flex-h-center'>
       <span className='material-symbols-outlined'>{notification.icon}</span>
