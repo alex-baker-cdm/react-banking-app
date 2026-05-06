@@ -2,6 +2,8 @@ import { useRef } from 'react';
 
 import { Link } from 'react-router-dom';
 
+import NotificationBadge from '../Notification/NotificationBadge';
+
 const Header: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -29,19 +31,12 @@ const Header: React.FC = () => {
         </div>
       </div>
       <div className='header-buttons flex flex-1 flex-v-center flex-end'>
+        <NotificationBadge />
         <Link to='/transactions' className='header-button flex flex-v-center flex-h-center'>
           <span className='material-symbols-outlined'>equalizer</span>
         </Link>
         <Link to='/cards' className='header-button flex flex-v-center flex-h-center'>
           <span className='material-symbols-outlined'>credit_card</span>
-        </Link>
-        <Link
-          to='/notifications'
-          className='header-button flex flex-v-center flex-h-center'
-          style={{ position: 'relative', marginLeft: 10 }}
-        >
-          <span className='material-symbols-outlined'>notifications</span>
-          <span className='badge'>3</span>
         </Link>
       </div>
     </header>

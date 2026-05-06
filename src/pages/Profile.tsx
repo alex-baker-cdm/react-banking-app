@@ -35,7 +35,7 @@ const Profile: React.FC = () => (
         <span className='material-symbols-outlined'>school</span>
         Learn
       </Link>
-      <Link to='/profile' className='flex flex-v-center flex-space-between'>
+      <Link to='/notifications' className='flex flex-v-center flex-space-between'>
         <div className='flex flex-v-center flex-h-center'>
           <span className='material-symbols-outlined'>inbox</span>
           Inbox
