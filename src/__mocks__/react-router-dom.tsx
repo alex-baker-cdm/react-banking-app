@@ -14,7 +14,7 @@ interface LinkLikeProps {
   [key: string]: unknown;
 }
 
-const renderAnchor = ({ children, to, ...rest }: LinkLikeProps): JSX.Element =>
+const renderAnchor = ({ children, to, ...rest }: LinkLikeProps): React.ReactElement =>
   React.createElement(
     'a',
     { href: typeof to === 'string' ? to : '#', ...rest },
