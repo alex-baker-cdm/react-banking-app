@@ -39,27 +39,30 @@ jobs:
             exit 1
           fi
           
+          DEVIN_ID="devin-${SESSION_ID}"
           echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
-          echo "Created session: $SESSION_ID"
+          echo "devin_id=$DEVIN_ID" >> $GITHUB_OUTPUT
+          echo "Created session: $SESSION_ID (devin_id: $DEVIN_ID)"
 
       - name: Wait for Session to Complete
         id: wait-session
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
           DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
+          DEVIN_ID: ${{ steps.create-session.outputs.devin_id }}
           SESSION_ID: ${{ steps.create-session.outputs.session_id }}
         run: |
-          echo "Waiting for session $SESSION_ID to complete..."
+          echo "Waiting for session $DEVIN_ID to complete..."
           
           MAX_ATTEMPTS=40
           ATTEMPT=0
           
           while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
             RESPONSE=$(curl -s --request GET \
-              --url "https://api.devin.ai/v3/organizations/${DEVIN_ORG_ID}/sessions/${SESSION_ID}" \
+              --url "https://api.devin.ai/v3/organizations/${DEVIN_ORG_ID}/sessions/${DEVIN_ID}" \
               --header "Authorization: Bearer ${DEVIN_API_KEY}")
             
-            STATUS=$(echo "$RESPONSE" | jq -r '.status_enum')
+            STATUS=$(echo "$RESPONSE" | jq -r '.status')
             echo "Attempt $((ATTEMPT+1))/$MAX_ATTEMPTS - Status: $STATUS"
             
             if [ "$STATUS" == "finished" ] || [ "$STATUS" == "stopped" ] || [ "$STATUS" == "suspended" ] || [ "$STATUS" == "blocked" ]; then
