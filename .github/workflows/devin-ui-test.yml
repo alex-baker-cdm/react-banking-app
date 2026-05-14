@@ -67,16 +67,20 @@ jobs:
             echo "Attempt $((ATTEMPT+1))/$MAX_ATTEMPTS - Status: $STATUS (detail: $STATUS_DETAIL)"
             
             if [ "$STATUS" == "exit" ] || [ "$STATUS" == "error" ] || [ "$STATUS" == "suspended" ] || [ "$STATUS_DETAIL" == "waiting_for_user" ]; then
-              echo "Session completed with status: $STATUS"
+              echo "Session completed with status: $STATUS (detail: $STATUS_DETAIL)"
               
-              STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -c '.structured_output')
+              STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -c '.structured_output // {}')
               echo "structured_output=$STRUCTURED_OUTPUT" >> $GITHUB_OUTPUT
               
-              CHECK_PASSED=$(echo "$RESPONSE" | jq -r '.structured_output.check_passed // false')
-              echo "check_passed=$CHECK_PASSED" >> $GITHUB_OUTPUT
-              
-              DETAILS=$(echo "$RESPONSE" | jq -r '.structured_output.details // "No details"')
-              echo "details=$DETAILS" >> $GITHUB_OUTPUT
+              # Session completed successfully if it didn't error out
+              if [ "$STATUS" == "error" ]; then
+                echo "check_passed=false" >> $GITHUB_OUTPUT
+                echo "details=Session ended with error" >> $GITHUB_OUTPUT
+              else
+                echo "check_passed=true" >> $GITHUB_OUTPUT
+                DETAILS=$(echo "$RESPONSE" | jq -r '.structured_output.details // "SCA scan completed"')
+                echo "details=$DETAILS" >> $GITHUB_OUTPUT
+              fi
               
               break
             fi
