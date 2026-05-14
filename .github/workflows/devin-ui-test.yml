@@ -66,7 +66,7 @@ jobs:
             STATUS_DETAIL=$(echo "$RESPONSE" | jq -r '.status_detail // ""')
             echo "Attempt $((ATTEMPT+1))/$MAX_ATTEMPTS - Status: $STATUS (detail: $STATUS_DETAIL)"
             
-            if [ "$STATUS" == "exit" ] || [ "$STATUS" == "error" ] || [ "$STATUS" == "suspended" ]; then
+            if [ "$STATUS" == "exit" ] || [ "$STATUS" == "error" ] || [ "$STATUS" == "suspended" ] || [ "$STATUS_DETAIL" == "waiting_for_user" ]; then
               echo "Session completed with status: $STATUS"
               
               STRUCTURED_OUTPUT=$(echo "$RESPONSE" | jq -c '.structured_output')
