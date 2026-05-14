@@ -16,15 +16,15 @@ jobs:
       - name: Create Devin Session
         id: create-session
         env:
-          DEVIN_API_KEY_V3: ${{ secrets.DEVIN_API_KEY_V3 }}
+          DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
           DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
           DEVIN_PLAYBOOK_ID: "playbook-88e89fadd5c141c6bd5e5942b0e31ba8"
         run: |
           echo "Creating Devin session for SCA vulnerability check..."
           
           RESPONSE=$(curl -s --request POST \
-            --url "https://api.devin.ai/v3beta1/organizations/${DEVIN_ORG_ID}/sessions" \
-            --header "Authorization: Bearer ${DEVIN_API_KEY_V3}" \
+            --url "https://api.devin.ai/v3/organizations/${DEVIN_ORG_ID}/sessions" \
+            --header "Authorization: Bearer ${DEVIN_API_KEY}" \
             --header 'Content-Type: application/json' \
             --data "{
               \"prompt\": \"Run the SCA Vulnerability Check playbook. Repository: ${{ github.repository }}, PR #${{ github.event.pull_request.number }}, Branch: ${{ github.head_ref }}. Clone the repo, checkout the PR branch (${{ github.head_ref }}), run the Snyk SCA scan, and if you find simple fixes, push them to the ${{ github.head_ref }} branch.\",
@@ -45,7 +45,8 @@ jobs:
       - name: Wait for Session to Complete
         id: wait-session
         env:
-          DEVIN_API_KEY_V1: ${{ secrets.DEVIN_API_KEY_V1 }}
+          DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+          DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
           SESSION_ID: ${{ steps.create-session.outputs.session_id }}
         run: |
           echo "Waiting for session $SESSION_ID to complete..."
@@ -55,8 +56,8 @@ jobs:
           
           while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
             RESPONSE=$(curl -s --request GET \
-              --url "https://api.devin.ai/v1/sessions/${SESSION_ID}" \
-              --header "Authorization: Bearer ${DEVIN_API_KEY_V1}")
+              --url "https://api.devin.ai/v3/organizations/${DEVIN_ORG_ID}/sessions/${SESSION_ID}" \
+              --header "Authorization: Bearer ${DEVIN_API_KEY}")
             
             STATUS=$(echo "$RESPONSE" | jq -r '.status_enum')
             echo "Attempt $((ATTEMPT+1))/$MAX_ATTEMPTS - Status: $STATUS"
