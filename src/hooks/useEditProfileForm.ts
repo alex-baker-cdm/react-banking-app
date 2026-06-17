@@ -127,6 +127,10 @@ const useEditProfileForm = (): UseEditProfileFormReturn => {
 
       setIsSaving(true);
 
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
       saveTimeoutRef.current = setTimeout(() => {
         setIsSaving(false);
         setSuccessMessage('Profile updated successfully!');

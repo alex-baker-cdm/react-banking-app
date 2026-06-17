@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { Flex, Button, Alert, Divider as AmplifyDivider, Avatar } from '@aws-amplify/ui-react';
+
 import Layout from '../components/Layout/Layout';
 import Divider from '../components/Divider/Divider';
 import PersonalInfoCard from '../components/EditProfile/PersonalInfoCard';
 import AddressCard from '../components/EditProfile/AddressCard';
+
 import useEditProfileForm from '../hooks/useEditProfileForm';
 
 const EditProfile: React.FC = () => {
@@ -23,7 +25,7 @@ const EditProfile: React.FC = () => {
 
       <form className='edit-profile-container' onSubmit={handleSubmit}>
         <Flex justifyContent='center' marginBottom='1rem'>
-          <Avatar src='images/profile.jpg' alt='Profile photo' size='large' />
+          <Avatar src='/images/profile.jpg' alt='Profile photo' size='large' />
         </Flex>
 
         {successMessage && (
