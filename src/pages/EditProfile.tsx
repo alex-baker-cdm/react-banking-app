@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Flex,
@@ -121,16 +121,28 @@ const EditProfile: React.FC = () => {
     setSuccessMessage('');
   };
 
-  const handleSave = (): void => {
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
     if (!validateForm()) {
       return;
     }
 
     setIsSaving(true);
 
-    setTimeout(() => {
+    saveTimeoutRef.current = setTimeout(() => {
       setIsSaving(false);
       setSuccessMessage('Profile updated successfully!');
+      saveTimeoutRef.current = null;
     }, 1000);
   };
 
@@ -144,7 +156,7 @@ const EditProfile: React.FC = () => {
 
       <h1 className='title'>Edit Profile</h1>
 
-      <div className='edit-profile-container'>
+      <form className='edit-profile-container' onSubmit={handleSubmit}>
         <Flex justifyContent='center' marginBottom='1rem'>
           <Avatar src='images/profile.jpg' alt='Profile photo' size='large' />
         </Flex>
@@ -257,12 +269,12 @@ const EditProfile: React.FC = () => {
         </Card>
 
         <Flex direction='row' justifyContent='space-between' marginTop='1.5rem' gap='1rem'>
-          <Button variation='link' onClick={handleCancel} isFullWidth>
+          <Button variation='link' type='button' onClick={handleCancel} isFullWidth>
             Cancel
           </Button>
           <Button
             variation='primary'
-            onClick={handleSave}
+            type='submit'
             isLoading={isSaving}
             loadingText='Saving...'
             isFullWidth
@@ -270,7 +282,7 @@ const EditProfile: React.FC = () => {
             Save Changes
           </Button>
         </Flex>
-      </div>
+      </form>
 
       <Divider />
     </Layout>
