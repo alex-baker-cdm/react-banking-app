@@ -27,9 +27,9 @@ const Profile: React.FC = () => (
         <span className='material-symbols-outlined'>support</span>
         Help
       </Link>
-      <Link to='/profile' className='flex flex-v-center'>
+      <Link to='/profile/edit' className='flex flex-v-center'>
         <span className='material-symbols-outlined'>account_circle</span>
-        Account
+        Edit Profile
       </Link>
       <Link to='/profile' className='flex flex-v-center'>
         <span className='material-symbols-outlined'>school</span>
