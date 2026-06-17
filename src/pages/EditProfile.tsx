@@ -78,7 +78,7 @@ const EditProfile: React.FC = () => {
 
     if (!formData.username.trim()) {
       newErrors.username = 'Username is required';
-    } else if (formData.username.length < 3) {
+    } else if (formData.username.trim().length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
     }
 
