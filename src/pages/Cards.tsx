@@ -6,7 +6,7 @@ import History from '../components/History/History';
 import Divider from '../components/Divider/Divider';
 import { useScreenLoadMonitor } from '../hooks/useScreenLoadMonitor';
 
-const SIMULATED_LOAD_DELAY_MS = 5000;
+const SIMULATED_LOAD_DELAY_MS = 1500;
 
 const Cards: React.FC = () => {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -33,8 +33,36 @@ const Cards: React.FC = () => {
       <Layout>
         <Divider />
         <h1 className='title no-select'>Cards</h1>
-        <div className='flex flex-h-center flex-v-center' style={{ minHeight: '200px' }}>
-          <p>Loading cards...</p>
+        <div className='cards'>
+          <div
+            className='skeleton'
+            style={{ width: '470px', height: '300px', maxWidth: '100%', margin: '0 auto' }}
+          />
+          <div
+            className='card-balance flex flex-v-center flex-space-between'
+            style={{ marginTop: '20px' }}
+          >
+            <div className='flex flex-col flex-h-center flex-1 center'>
+              <div
+                className='skeleton'
+                style={{ width: '80px', height: '16px', margin: '0 auto 8px' }}
+              />
+              <div
+                className='skeleton'
+                style={{ width: '100px', height: '20px', margin: '0 auto' }}
+              />
+            </div>
+            <div className='flex flex-col flex-h-center flex-1 center'>
+              <div
+                className='skeleton'
+                style={{ width: '80px', height: '16px', margin: '0 auto 8px' }}
+              />
+              <div
+                className='skeleton'
+                style={{ width: '100px', height: '20px', margin: '0 auto' }}
+              />
+            </div>
+          </div>
         </div>
       </Layout>
     );
@@ -52,6 +80,8 @@ const Cards: React.FC = () => {
           cvcNumber='824'
           validUntil='10 / 30'
           cardHolder='CENK SARI'
+          balance={783.45}
+          limit={1250.0}
         />
       </div>
 
