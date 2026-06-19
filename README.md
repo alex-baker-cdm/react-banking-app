@@ -1,23 +1,13 @@
-# React Banking App Template
+# React Banking App
 
-Are you ready to revolutionize the world of online banking? This template is designed to help you create a modern, user-friendly, and visually stunning banking application using React. With its sleek design and cutting-edge technology, this template is the perfect starting point for your next project.
+A modern, mobile-first banking application built with React. Provides a clean, intuitive interface for account management, transaction tracking, and card management.
 
 **Key Features**
 
 - **Responsive Design**: A mobile-first approach ensures a seamless user experience across all devices.
 - **Modern UI**: A clean, intuitive interface that makes banking easy and enjoyable.
 - **Customizable**: Tailor the template to fit your brand's unique style and needs.
-- **Easy Integration**: Integrate with your existing banking systems or third-party services with ease.
-
-**Get Started**
-
-Whether you're a seasoned developer or just starting out, this template provides a solid foundation for your project. Follow the simple installation steps to get up and running quickly.
-
-## Support this project
-
-You are free to download, change and use it anywhere. I will regularly update this template with new resources and pages I found on the web. Don't hesitate to participate by sending a PR! Maybe your first on Github :)
-
-If you like this resource, please follow me on GitHub. Thank you!
+- **Error Monitoring**: Integrated with [Sentry](https://sentry.io) for error tracking and performance monitoring.
 
 ## Demo
 
@@ -25,44 +15,38 @@ If you like this resource, please follow me on GitHub. Thank you!
 
 ## Screenshots
 
-![Signin](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/signin.png)
+![Signin](screenshots/signin.png)
 
-![Home](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/home.png)
+![Home](screenshots/home.png)
 
-![Transactions](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/transactions.png)
+![Transactions](screenshots/transactions.png)
 
-![Cards](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/cards.png)
+![Cards](screenshots/cards.png)
 
-![Add](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/addmoney.png)
+![Add Money](screenshots/addmoney.png)
 
-![Profile](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/profile.png)
+![Profile](screenshots/profile.png)
 
-![Savings](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/savings.png)
+![Savings](screenshots/savings.png)
 
 ## Installation
 
 1. Clone the project:
 
    ```bash
-   git clone https://github.com/cenksari/react-banking-app-template.git
+   git clone https://github.com/alex-baker-cdm/react-banking-app.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd react-banking-app-template
+   cd react-banking-app
    ```
 
 3. Install dependencies:
 
    ```bash
-   npm install
-   ```
-
-   or
-
-   ```bash
-   yarn install
+   npm install --legacy-peer-deps
    ```
 
 4. Start the application:
@@ -73,7 +57,7 @@ If you like this resource, please follow me on GitHub. Thank you!
 
 ## Usage
 
-Once the application is started, navigate to [http://localhost:3000](http://localhost:3000) in your browser to test application.
+Once the application is started, navigate to [http://localhost:3000](http://localhost:3000) in your browser to test the application.
 
 ## Error Tracking with Sentry
 
@@ -99,10 +83,6 @@ The Sentry DSN is configured in `src/sentry.ts`. If you fork this repository, re
 ## Contributing
 
 If you would like to contribute, please create a new branch and submit a pull request with your changes. Review may be needed before acceptance.
-
-## Authors
-
-@cenksari
 
 ## License
 
