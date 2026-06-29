@@ -21,13 +21,6 @@ import { DividerComponent } from '../../components/divider/divider.component';
     <app-layout>
       <app-balance [balance]="1325.5" currency="EURO" currencySymbol="&euro;" />
 
-      <button
-        (click)="throwTestError()"
-        style="padding: 10px 20px; background-color: #ff4444; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px"
-      >
-        Test Sentry Error
-      </button>
-
       <app-actions />
 
       <app-divider />
@@ -42,8 +35,4 @@ import { DividerComponent } from '../../components/divider/divider.component';
     </app-layout>
   `,
 })
-export class HomeComponent {
-  throwTestError(): void {
-    throw new Error('This is a test error for Sentry!');
-  }
-}
+export class HomeComponent {}

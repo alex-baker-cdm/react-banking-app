@@ -1,10 +1,10 @@
-import { ErrorHandler, Injectable } from '@angular/core';
+import { ErrorHandler, Injectable, isDevMode } from '@angular/core';
 import * as Sentry from '@sentry/angular';
 
 export function initSentry(): void {
   Sentry.init({
     dsn: 'https://fa0774748965d0ba5750f85f30277d61@o4510814435147776.ingest.us.sentry.io/4510814438555648',
-    environment: 'production',
+    environment: isDevMode() ? 'development' : 'production',
     sendDefaultPii: true,
     tracesSampleRate: 1.0,
     replaysSessionSampleRate: 0.1,
@@ -17,6 +17,7 @@ export function initSentry(): void {
 export class SentryErrorHandler implements ErrorHandler {
   handleError(error: unknown): void {
     Sentry.captureException(error);
+    console.error(error);
   }
 }
 
