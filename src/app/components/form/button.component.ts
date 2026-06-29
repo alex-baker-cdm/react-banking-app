@@ -8,6 +8,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
       [tabIndex]="tabIndex"
       [type]="type === 'submit' ? 'submit' : 'button'"
       [class]="'button ' + (disabled ? 'disabled' : 'active')"
+      [disabled]="disabled"
       (click)="buttonClick.emit()"
     >
       {{ text }}

@@ -8,7 +8,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
       tabindex="0"
       role="button"
       (click)="selectCurrency.emit()"
-      (keydown)="onKeyDown()"
+      (keydown)="onKeyDown($event)"
       class="history-line flex flex-h-center flex-v-center pointer"
     >
       <div class="history-line-icon flex flex-1">
@@ -33,7 +33,10 @@ export class CurrencyComponent {
   @Input() active = false;
   @Output() selectCurrency = new EventEmitter<void>();
 
-  onKeyDown(): void {
-    /* placeholder for keyboard handler */
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.selectCurrency.emit();
+    }
   }
 }
