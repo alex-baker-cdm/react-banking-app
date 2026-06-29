@@ -1,27 +1,14 @@
-# React Banking App Template
+# Angular Banking App
 
-Are you ready to revolutionize the world of online banking? This template is designed to help you create a modern, user-friendly, and visually stunning banking application using React. With its sleek design and cutting-edge technology, this template is the perfect starting point for your next project.
+A modern, mobile-first banking application built with Angular 19. Originally a React application, this has been refactored to use Angular with standalone components, Angular Router, and reactive forms.
 
 **Key Features**
 
 - **Responsive Design**: A mobile-first approach ensures a seamless user experience across all devices.
-- **Modern UI**: A clean, intuitive interface that makes banking easy and enjoyable.
-- **Customizable**: Tailor the template to fit your brand's unique style and needs.
-- **Easy Integration**: Integrate with your existing banking systems or third-party services with ease.
-
-**Get Started**
-
-Whether you're a seasoned developer or just starting out, this template provides a solid foundation for your project. Follow the simple installation steps to get up and running quickly.
-
-## Support this project
-
-You are free to download, change and use it anywhere. I will regularly update this template with new resources and pages I found on the web. Don't hesitate to participate by sending a PR! Maybe your first on Github :)
-
-If you like this resource, please follow me on GitHub. Thank you!
-
-## Demo
-
-[https://react-banking-app-template.vercel.app](https://react-banking-app-template.vercel.app)
+- **Modern UI**: A clean, intuitive interface with glassmorphism styling that makes banking easy and enjoyable.
+- **Standalone Components**: Uses Angular 19 standalone components for a modular architecture.
+- **Angular Router**: Client-side routing for all pages (Signin, Home, Cards, Send Money, Savings, Profile, Add Money, Transactions).
+- **Error Tracking**: Integrated Sentry for error monitoring, performance tracing, and session replay.
 
 ## Screenshots
 
@@ -44,13 +31,13 @@ If you like this resource, please follow me on GitHub. Thank you!
 1. Clone the project:
 
    ```bash
-   git clone https://github.com/cenksari/react-banking-app-template.git
+   git clone https://github.com/alex-baker-cdm/react-banking-app.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd react-banking-app-template
+   cd react-banking-app
    ```
 
 3. Install dependencies:
@@ -59,13 +46,7 @@ If you like this resource, please follow me on GitHub. Thank you!
    npm install
    ```
 
-   or
-
-   ```bash
-   yarn install
-   ```
-
-4. Start the application:
+4. Start the development server:
 
    ```bash
    npm start
@@ -73,36 +54,68 @@ If you like this resource, please follow me on GitHub. Thank you!
 
 ## Usage
 
-Once the application is started, navigate to [http://localhost:3000](http://localhost:3000) in your browser to test application.
+Once the application is started, navigate to [http://localhost:4200](http://localhost:4200) in your browser to test the application.
+
+## Scripts
+
+- `npm start` - Start the Angular dev server
+- `npm run build` - Build for production
+- `npm test` - Run unit tests with Karma
+- `npm run lint` - Run ESLint with angular-eslint
+
+## Project Structure
+
+```
+src/
+  app/
+    components/    # Reusable UI components
+      actions/     # Action circles (Add, Send, Details, More)
+      add/         # Add money sub-components (Saved, Destination)
+      arrow/       # Transfer arrow indicator
+      balance/     # Account balance display
+      card/        # Credit card with flip animation
+      circle/      # Icon circle component
+      currency/    # Currency selection item
+      divider/     # Section divider
+      form/        # Form controls (Button, Input)
+      header/      # App header with search and navigation
+      history/     # Transaction history list
+      layout/      # Page layout wrapper
+      send/        # Send money sub-components
+      widgets/     # Dashboard widget links
+    pages/         # Route-level page components
+      signin/      # Sign-in page
+      home/        # Dashboard home
+      cards/       # Card management
+      send-money/  # Send money flow
+      savings/     # Savings/currency selection
+      profile/     # User profile
+      add/         # Add money page
+      transactions/# Transaction history
+    services/      # Angular services
+      sentry.service.ts          # Sentry initialization and error handler
+      screen-load-monitor.service.ts  # Performance monitoring
+  styles.css       # Global styles (glassmorphism UI)
+  index.html       # Application shell
+  main.ts          # Bootstrap entry point
+```
 
 ## Error Tracking with Sentry
 
 This application includes [Sentry](https://sentry.io) for error monitoring, performance tracing, and session replay.
 
-**Features:**
-- Automatic error capture and reporting
-- Browser performance tracing
-- Session replay for debugging user issues
-- ErrorBoundary component wrapping the app to catch React errors
-
 **Configuration:**
 
-The Sentry DSN is configured in `src/sentry.ts`. If you fork this repository, replace the DSN with your own from your Sentry project settings.
+The Sentry DSN is configured in `src/app/services/sentry.service.ts`. Replace the DSN with your own from your Sentry project settings.
 
-**Sample Rates (configurable in `src/sentry.ts`):**
-- `tracesSampleRate: 1.0` - Captures 100% of transactions for performance monitoring (reduce in production to manage costs)
+**Sample Rates:**
+- `tracesSampleRate: 1.0` - Captures 100% of transactions for performance monitoring
 - `replaysSessionSampleRate: 0.1` - Captures 10% of all sessions for replay
 - `replaysOnErrorSampleRate: 1.0` - Captures 100% of sessions with errors for replay
 
-**Note:** The test error button on the Home page is for verifying Sentry integration and should be removed before production deployment.
-
 ## Contributing
 
-If you would like to contribute, please create a new branch and submit a pull request with your changes. Review may be needed before acceptance.
-
-## Authors
-
-@cenksari
+If you would like to contribute, please create a new branch and submit a pull request with your changes.
 
 ## License
 
