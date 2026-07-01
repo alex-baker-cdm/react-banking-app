@@ -16,6 +16,7 @@ interface IProps {
   item: IData;
 }
 
+// Renders a single transaction row with a category icon, name, time, and amount
 const HistoryLine: React.FC<IProps> = ({ item }) => (
   <div className='history-line flex flex-h-center flex-v-center'>
     <div className='history-line-icon flex flex-1'>

@@ -8,6 +8,7 @@ interface IProps {
   onSelect: () => void;
 }
 
+// Renders a selectable currency row showing icon, name, short code, and AER rate
 const Currency: React.FC<IProps> = ({
   aer,
   name,

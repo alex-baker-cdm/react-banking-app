@@ -6,7 +6,7 @@ import History from '../components/History/History';
 import Widgets from '../components/Widgets/Widgets';
 import Divider from '../components/Divider/Divider';
 
-// Test button to verify Sentry error tracking - remove after testing
+// Test button to verify Sentry error tracking; remove after testing
 const SentryTestButton: React.FC = () => (
   <button
     onClick={() => {
@@ -26,6 +26,7 @@ const SentryTestButton: React.FC = () => (
   </button>
 );
 
+// Main dashboard page displaying balance, quick actions, transaction history, and widgets
 const Home: React.FC = () => (
   <Layout>
     <Balance balance={1325.5} currency='EURO' currencySymbol='€' />

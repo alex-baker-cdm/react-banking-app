@@ -3,6 +3,7 @@ import Layout from '../components/Layout/Layout';
 import History from '../components/History/History';
 import Divider from '../components/Divider/Divider';
 
+// Transactions page listing detailed transaction history grouped by date
 const Transactions: React.FC = () => (
   <Layout>
     <Divider />

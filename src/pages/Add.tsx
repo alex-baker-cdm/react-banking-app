@@ -6,6 +6,7 @@ import Layout from '../components/Layout/Layout';
 import Divider from '../components/Divider/Divider';
 import Destination from '../components/Add/Destination';
 
+// Add Money page showing the saved source card, destination account, and submit button
 const Add: React.FC = () => (
   <Layout>
     <Divider />

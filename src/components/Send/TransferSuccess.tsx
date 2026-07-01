@@ -8,6 +8,7 @@ interface IProps {
   onDone: () => void;
 }
 
+// Displays a success confirmation with checkmark, transferred amount, and recipient name
 const TransferSuccess: React.FC<IProps> = ({
   amount,
   currencySymbol = '\u20ac',

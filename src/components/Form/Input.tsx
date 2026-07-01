@@ -11,6 +11,7 @@ interface IProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+// Renders a text input with optional validation error message
 const Input: React.FC<IProps> = ({
   name,
   type,

@@ -6,8 +6,10 @@ import History from '../components/History/History';
 import Divider from '../components/Divider/Divider';
 import { useScreenLoadMonitor } from '../hooks/useScreenLoadMonitor';
 
+// Artificial delay to simulate fetching card data from a backend
 const SIMULATED_LOAD_DELAY_MS = 5000;
 
+// Card management page with a simulated loading state and transaction history
 const Cards: React.FC = () => {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const setLoadComplete = useScreenLoadMonitor({

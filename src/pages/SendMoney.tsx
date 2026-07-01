@@ -2,6 +2,7 @@
 import Layout from '../components/Layout/Layout';
 import Divider from '../components/Divider/Divider';
 
+// Send Money page prompting the user to select a recipient
 const SendMoney: React.FC = () => (
   <Layout>
     <Divider />

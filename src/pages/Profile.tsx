@@ -4,12 +4,14 @@ import { Link } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
 import Divider from '../components/Divider/Divider';
 
+// User profile page with avatar, account settings, preferences, and sign-out
 const Profile: React.FC = () => (
   <Layout>
     <Divider />
 
     <h1 className='title'>Profile</h1>
 
+    {/* Profile photo and user identity */}
     <div className='account-photo' style={{ backgroundImage: `url("images/profile.jpg")` }} />
 
     <div className='center'>

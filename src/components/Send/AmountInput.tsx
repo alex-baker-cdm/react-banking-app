@@ -10,6 +10,7 @@ interface IProps {
   currencySymbol?: string;
 }
 
+// Renders a currency amount input with balance validation for the Send Money flow
 const AmountInput: React.FC<IProps> = ({
   onContinue,
   maxAmount = 1325.5,

@@ -6,10 +6,12 @@ interface IProps {
   cardHolder: string;
 }
 
+// Renders a 3D-flippable credit card showing the front and back faces
 const Card: React.FC<IProps> = ({ number, cvcNumber, validUntil, cardHolder }) => (
   <>
     <div className='card no-select'>
       <div className='card-inner'>
+        {/* Front face: contactless icon, Visa logo, card number, holder name, and expiry */}
         <div className='front'>
           <div className='row'>
             <svg fill='#ffffff' width='27px' height='39px' viewBox='0 3.71 26.959 38.787'>
@@ -36,6 +38,7 @@ const Card: React.FC<IProps> = ({ number, cvcNumber, validUntil, cardHolder }) =
             <p>{validUntil}</p>
           </div>
         </div>
+        {/* Back face: magnetic strip, CVC, disclaimer text, and signature area */}
         <div className='back'>
           <div className='bar' />
           <div className='row card-cvv'>
@@ -61,6 +64,7 @@ const Card: React.FC<IProps> = ({ number, cvcNumber, validUntil, cardHolder }) =
       </div>
     </div>
 
+    {/* Balance and limit summary displayed below the card */}
     <div className='card-balance flex flex-v-center flex-space-between'>
       <div className='flex flex-col flex-h-center flex-1 center'>
         <h3>Balance</h3>

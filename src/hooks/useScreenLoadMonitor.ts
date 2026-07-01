@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Sentry } from '../sentry';
 
+// Default threshold before a screen load is considered slow and reported to Sentry
 const LOAD_TIME_THRESHOLD_MS = 3000;
 
 interface ScreenLoadMonitorOptions {
@@ -8,6 +9,7 @@ interface ScreenLoadMonitorOptions {
   thresholdMs?: number;
 }
 
+// Tracks screen load time and reports to Sentry when it exceeds the threshold
 export function useScreenLoadMonitor({
   screenName,
   thresholdMs = LOAD_TIME_THRESHOLD_MS,

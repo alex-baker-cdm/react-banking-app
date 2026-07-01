@@ -10,6 +10,7 @@ import Savings from '../pages/Savings';
 import SendMoney from '../pages/SendMoney';
 import Transactions from '../pages/Transactions';
 
+// Defines all client-side routes mapping URL paths to page components
 const Navigation: React.FC = () => (
   <Routes>
     <Route path='/' element={<Signin />} />
