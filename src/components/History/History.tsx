@@ -10,12 +10,14 @@ interface IProps {
   dateBalance?: string;
 }
 
+// Renders a list of recent transactions with an optional date header in detailed mode
 const History: React.FC<IProps> = ({
   date = undefined,
   detailed = false,
   dateBalance = undefined,
 }) => (
   <>
+    {/* Date header shown only in detailed view */}
     {detailed && (
       <div className='history-header flex flex-v-center flex-space-between'>
         <span className='text-shadow no-select date'>{date}</span>

@@ -6,6 +6,7 @@ interface ErrorFallbackProps {
   resetError: () => void;
 }
 
+// Fallback UI displayed when an unhandled error is caught by the boundary
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
   const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
   return (
@@ -23,6 +24,7 @@ interface ErrorBoundaryProps {
   children: React.ReactNode;
 }
 
+// Wraps child components in a Sentry error boundary to capture and display errors gracefully
 export const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({ children }) => (
   <Sentry.ErrorBoundary
     fallback={({ error, resetError }) => <ErrorFallback error={error} resetError={resetError} />}

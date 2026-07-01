@@ -13,6 +13,7 @@ interface IProps {
   onCancel: () => void;
 }
 
+// Displays a transfer summary with source card, recipient, amount, and confirm/cancel actions
 const TransferConfirmation: React.FC<IProps> = ({
   recipientName,
   recipientAccountInfo,
@@ -23,6 +24,7 @@ const TransferConfirmation: React.FC<IProps> = ({
   onCancel,
 }) => (
   <div>
+    {/* Source account (sender's card) */}
     <div className='accounts flex flex-v-center'>
       <div className='account-circle flex flex-v-center flex-h-center'>
         <svg fill='#ffffff' width='80px' height='80px' viewBox='0 0 24.00 24.00'>
@@ -40,6 +42,7 @@ const TransferConfirmation: React.FC<IProps> = ({
 
     <Arrow />
 
+    {/* Destination account (recipient) */}
     <div className='accounts flex flex-v-center'>
       <div className='account-circle flex flex-v-center flex-h-center'>
         <span className='material-symbols-outlined' style={{ color: '#ffffff' }}>
@@ -52,6 +55,7 @@ const TransferConfirmation: React.FC<IProps> = ({
       </div>
     </div>
 
+    {/* Transfer amount display */}
     <div className='center' style={{ margin: '20px 0' }}>
       <p className='text-shadow' style={{ fontSize: '2em', fontWeight: 500 }}>
         {currencySymbol}

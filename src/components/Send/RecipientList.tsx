@@ -12,6 +12,7 @@ interface IProps {
   selectedId?: number;
 }
 
+// Static list of saved recipients available for money transfers
 const recipients: Recipient[] = [
   { id: 1, name: 'Sarah Johnson', initials: 'SJ', color: 'blue', accountInfo: 'IBAN ...4521' },
   { id: 2, name: 'Mike Peters', initials: 'MP', color: 'purple', accountInfo: 'IBAN ...8834' },
@@ -20,6 +21,7 @@ const recipients: Recipient[] = [
   { id: 5, name: 'Lisa Chen', initials: 'LC', color: 'orange', accountInfo: 'IBAN ...3345' },
 ];
 
+// Renders a scrollable list of recipients that can be selected for a transfer
 const RecipientList: React.FC<IProps> = ({ onSelect, selectedId = undefined }) => (
   <div className='history'>
     {recipients.map((recipient) => (

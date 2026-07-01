@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 
+// Renders shortcut widget links for Transactions, Cards, and Savings
 const Widgets: React.FC = () => (
   <div className='widgets flex flex-v-center flex-space-between'>
     <Link to='/transactions' className='widget no-select flex flex-col flex-v-center flex-h-center'>

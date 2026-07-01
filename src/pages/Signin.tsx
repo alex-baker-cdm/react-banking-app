@@ -6,6 +6,7 @@ import { Sentry } from '../sentry';
 import Input from '../components/Form/Input';
 import Button from '../components/Form/Button';
 
+// Sign-in page with email validation, password input, and Sentry error reporting
 const Signin: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');

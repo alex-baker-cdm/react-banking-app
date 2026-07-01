@@ -1,5 +1,7 @@
+// Displays the saved payment card (source account) used when adding money
 const Saved: React.FC = () => (
   <div className='accounts flex flex-v-center flex-space-between'>
+    {/* Visa card icon */}
     <div className='account-icon flex flex-1'>
       <div className='account-circle flex flex-h-center flex-v-center'>
         <svg fill='#ffffff' width='80px' height='80px' viewBox='0 0 24.00 24.00'>

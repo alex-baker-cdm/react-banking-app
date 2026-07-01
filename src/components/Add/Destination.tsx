@@ -1,5 +1,7 @@
+// Displays the destination account with currency selector and amount input for adding money
 const Destination: React.FC = () => (
   <div className='accounts flex flex-v-center flex-space-between'>
+    {/* Currency selector showing the active currency and current balance */}
     <div className='account-balance flex flex-col'>
       <div className='flex flex-v-center no-select pointer'>
         <span>EURO</span>
@@ -7,6 +9,7 @@ const Destination: React.FC = () => (
       </div>
       <span className='account-balance-bottom'>Balance: € 231.40</span>
     </div>
+    {/* Amount input field with fee information */}
     <div className='account-money flex flex-col right'>
       <div className='flex flex-v-center flex-end'>
         <span>€</span>

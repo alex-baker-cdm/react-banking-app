@@ -6,6 +6,7 @@ import Layout from '../components/Layout/Layout';
 import Divider from '../components/Divider/Divider';
 import Currency from '../components/Currency/Currency';
 
+// Savings page allowing users to select a currency and view annual equivalent rates
 const Savings: React.FC = () => {
   const [selected, setSelected] = useState<string>('');
 
