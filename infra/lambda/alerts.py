@@ -25,6 +25,7 @@ ENVIRONMENT = os.environ["ENVIRONMENT"]
 REGION = os.environ["AWS_REGION"]
 APP_REPO = os.environ["APP_REPO"]
 APP_URL = os.environ.get("APP_URL", "")
+APP_BRANCH = os.environ.get("APP_BRANCH", "master")
 APP_LOG_GROUP = os.environ["APP_LOG_GROUP"]
 DEVIN_API_URL = os.environ.get("DEVIN_API_URL", "https://api.devin.ai/v3")
 DEVIN_ORG_ID = os.environ["DEVIN_ORG_ID"]
@@ -138,7 +139,7 @@ reproduction, fix, on-camera verification, pull request.
 - Error: {incident.get("errorName", "")}: {incident.get("errorMessage", "")}
 - Region / log group / log stream: {REGION} / `{incident.get("logGroup", APP_LOG_GROUP)}` / `{incident.get("logStream", "")}`
 {appUrlLine}
-- Repository: https://github.com/{APP_REPO} (default branch `master`)
+- Repository: https://github.com/{APP_REPO} (deployed branch `{APP_BRANCH}`)
 
 ### Structured error log line (already collected)
 ```json
@@ -169,17 +170,17 @@ reproduction, fix, on-camera verification, pull request.
    screen. Confirm the local server log shows the same stack trace. Trace the stack to the responsible code and
    identify the root cause - including any side effects the failed request left behind (e.g. a balance that was
    debited without the matching credit).
-3. **Fix it.** Create a new branch from `master` and make the minimal, general fix (no special-casing this one input).
+3. **Fix it.** Create a new branch from `{APP_BRANCH}` and make the minimal, general fix (no special-casing this one input).
    Add a regression test under `server/test/` that fails before the fix and passes after. Run `npm run test:server`,
    `npm run eslint` and `npm run typecheck`. Rebuild (`npm run build`), restart the server, and - still recording -
    submit the exact same transfer in the browser so the "Transfer complete" confirmation is on screen, then open
    Account Summary to show both balances updated correctly. Stop the recording.
-4. **Open a pull request** against `master` titled `fix(<component>): <description> [AUTO-TRIAGE]`. Embed the recording
+4. **Open a pull request** against `{APP_BRANCH}` titled `fix(<component>): <description> [AUTO-TRIAGE]`. Embed the recording
    in the description and include an incident note: symptom, root cause, customer impact, the fix, and how to confirm
-   recovery in production (which log line / metric to watch). Do not merge and do not push to `master`.
+   recovery in production (which log line / metric to watch). Do not merge and do not push to `{APP_BRANCH}`.
 
 ## Rules
-- This incident gets its own reproduction, fix and PR. Work from `master` only: do not look for, reuse, comment on, or
+- This incident gets its own reproduction, fix and PR. Work from `{APP_BRANCH}` only: do not look for, reuse, comment on, or
   build on existing branches or open pull requests for this or a similar error, even if one already exists.
 - Only change application code and tests. `infra/`, `.github/`, `ios/`, `Dockerfile` and deployment configuration are
   out of scope.

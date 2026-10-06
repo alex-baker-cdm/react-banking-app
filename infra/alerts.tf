@@ -70,6 +70,7 @@ resource "aws_lambda_function" "alerts" {
     variables = {
       ENVIRONMENT             = var.environment
       APP_REPO                = var.appRepo
+      APP_BRANCH              = var.appBranch
       APP_URL                 = "https://${aws_apprunner_service.app.service_url}"
       APP_LOG_GROUP           = local.appLogGroup
       DEVIN_API_URL           = var.devinApiUrl

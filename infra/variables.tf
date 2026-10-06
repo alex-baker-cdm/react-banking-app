@@ -40,3 +40,9 @@ variable "devinCreateAsUserId" {
   type        = string
   default     = ""
 }
+
+variable "appBranch" {
+  description = "Branch the deployed image was built from; triage sessions fix and open PRs against it"
+  type        = string
+  default     = "master"
+}
