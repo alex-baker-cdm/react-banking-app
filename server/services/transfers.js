@@ -37,16 +37,25 @@ function postingRulesFor(account) {
 function assertCanDebit(account, amount) {
   const rules = postingRulesFor(account);
   if (!rules.debit) {
-    throw new ValidationError(`You can't transfer money out of a ${account.type} account.`, 'fromAccountId');
+    throw new ValidationError(
+      `You can't transfer money out of a ${account.type} account.`,
+      'fromAccountId'
+    );
   }
   if (account[rules.debit] < amount) {
-    throw new ValidationError('The amount exceeds the available balance of the From account.', 'amount');
+    throw new ValidationError(
+      'The amount exceeds the available balance of the From account.',
+      'amount'
+    );
   }
 }
 
 function assertCanCredit(account) {
   if (!postingRulesFor(account).credit) {
-    throw new ValidationError(`You can't transfer money into a ${account.type} account.`, 'toAccountId');
+    throw new ValidationError(
+      `You can't transfer money into a ${account.type} account.`,
+      'toAccountId'
+    );
   }
 }
 
@@ -57,7 +66,7 @@ function postCredit(account, amount) {
   if (rules.mirror) {
     account[rules.mirror] = roundMoney(account[rules.mirror] + direction * amount);
   }
-  if (rules.offset) {
+  if (rules.offset && account[rules.offset] !== undefined) {
     account[rules.offset] = roundMoney(account[rules.offset] - direction * amount);
   }
 }

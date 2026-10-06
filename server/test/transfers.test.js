@@ -86,12 +86,13 @@ test('POST /api/transfers does not debit the From account when the credit cannot
   const transactions = seedTransactions();
   const server = await startTestServer({ accounts, transactions });
   try {
-    const { status } = await server.request('POST', '/api/transfers', {
+    const { status, body } = await server.request('POST', '/api/transfers', {
       fromAccountId: 'chk-4471',
       toAccountId: 'brk-7001',
       amount: '35.00',
     });
-    assert.notEqual(status, 201);
+    assert.equal(status, 500);
+    assert.equal(body.error.code, 'INTERNAL_ERROR');
 
     const checking = accounts.find((account) => account.id === 'chk-4471');
     assert.equal(checking.availableBalance, 4826.12);
