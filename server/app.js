@@ -4,6 +4,7 @@ const { seedAccounts, seedTransactions } = require('./data/accounts');
 const { createTransferService } = require('./services/transfers');
 const { accountsRouter } = require('./routes/accounts');
 const { transfersRouter } = require('./routes/transfers');
+const { statementsRouter } = require('./routes/statements');
 const { requestContext } = require('./middleware/requestContext');
 const { errorHandler } = require('./middleware/errorHandler');
 
@@ -27,6 +28,7 @@ function createApp({ accounts = seedAccounts(), transactions = seedTransactions(
 
   app.use('/api', accountsRouter({ accounts, transactions }));
   app.use('/api', transfersRouter({ transferService }));
+  app.use('/api', statementsRouter({ accounts, transactions }));
 
   app.use(express.static(webBuild));
   app.get(/^(?!\/api\/).*/, (req, res) => {
