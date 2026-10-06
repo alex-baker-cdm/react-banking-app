@@ -1,43 +1,38 @@
-import { useRef } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 
-import { Link } from 'react-router-dom';
-
-const Header: React.FC = () => {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  return (
-    <header className='flex flex-v-center flex-space-between'>
-      <div className='header-profile flex flex-1'>
-        <Link to='/profile'>
-          <div className='profile-photo' style={{ backgroundImage: 'url("images/profile.jpg")' }} />
+const Header: React.FC = () => (
+  <header className='wf-header'>
+    <div className='wf-topbar'>
+      <div className='container flex flex-v-center flex-space-between'>
+        <Link to='/accounts' className='wf-wordmark no-select' aria-label='Wells Fargo home'>
+          WELLS FARGO
         </Link>
+        <nav className='wf-topnav flex flex-v-center' aria-label='Account navigation'>
+          <span className='wf-greeting'>Good morning, Alex</span>
+          <Link to='/' className='wf-signoff'>
+            Sign off
+          </Link>
+        </nav>
       </div>
-      <div className='header-center'>
-        <div className='header-search flex flex-v-center'>
-          <span
-            tabIndex={0}
-            role='button'
-            onKeyDown={() => {}}
-            onClick={() => {
-              inputRef.current?.focus();
-            }}
-            className='material-symbols-outlined no-select'
-          >
-            search
-          </span>
-          <input ref={inputRef} type='text' name='search' id='search' placeholder='Search' />
-        </div>
+    </div>
+    <div className='wf-stripe' aria-hidden='true' />
+    <nav className='wf-subnav' aria-label='Primary'>
+      <div className='container flex flex-v-center'>
+        <NavLink to='/accounts' className={({ isActive }) => (isActive ? 'active' : '')}>
+          Accounts
+        </NavLink>
+        <NavLink to='/transfer' className={({ isActive }) => (isActive ? 'active' : '')}>
+          Transfer &amp; Pay
+        </NavLink>
+        <a href='#plan' onClick={(event) => event.preventDefault()}>
+          Plan &amp; Learn
+        </a>
+        <a href='#security' onClick={(event) => event.preventDefault()}>
+          Security &amp; Support
+        </a>
       </div>
-      <div className='header-buttons flex flex-1 flex-v-center flex-end'>
-        <Link to='/transactions' className='header-button flex flex-v-center flex-h-center'>
-          <span className='material-symbols-outlined'>equalizer</span>
-        </Link>
-        <Link to='/cards' className='header-button flex flex-v-center flex-h-center'>
-          <span className='material-symbols-outlined'>credit_card</span>
-        </Link>
-      </div>
-    </header>
-  );
-};
+    </nav>
+  </header>
+);
 
 export default Header;

@@ -9,7 +9,7 @@ interface ErrorFallbackProps {
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetError }) => {
   const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
   return (
-    <div role="alert" style={{ padding: '20px', textAlign: 'center' }}>
+    <div role='alert' style={{ padding: '20px', textAlign: 'center' }}>
       <h2>Something went wrong</h2>
       <p>{errorMessage}</p>
       <button onClick={resetError} style={{ padding: '10px 20px', cursor: 'pointer' }}>

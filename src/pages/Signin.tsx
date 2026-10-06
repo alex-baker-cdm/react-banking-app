@@ -1,122 +1,93 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Sentry } from '../sentry';
+import { useNavigate } from 'react-router-dom';
 
-// components
-import Input from '../components/Form/Input';
-import Button from '../components/Form/Button';
+import { Sentry } from '../sentry';
 
 const Signin: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  /**
-   * Validates an email address format.
-   *
-   * @param {string} email - The email address to validate.
-   * @returns {string} Error message if invalid, empty string if valid.
-   */
-  const validateEmail = (email: string): string => {
-    if (!email) {
-      return 'Email is required';
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return 'Please enter a valid email address';
-    }
-    return '';
-  };
-
-  /**
-   * Handles email input change and validates the email.
-   *
-   * @param {React.ChangeEvent<HTMLInputElement>} e - The input change event.
-   */
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const value = e.target.value;
-    setEmail(value);
-    setEmailError('');
-  };
-
-  /**
-   * Handles the form submission event by preventing the default behavior and navigating to the home page.
-   *
-   * @param {React.FormEvent} e - The form submission event.
-   */
-  const handleSubmit = (e: React.FormEvent): void => {
-    e.preventDefault();
-
-    const error = validateEmail(email);
-    if (error) {
-      setEmailError(error);
-      Sentry.captureMessage(`Email validation error: ${error}`, {
-        level: 'warning',
-        extra: { email },
-      });
+  const handleSubmit = (event: React.FormEvent): void => {
+    event.preventDefault();
+    if (!username.trim() || !password) {
+      const message = 'Enter your username and password.';
+      setError(message);
+      Sentry.captureMessage(`Sign-on validation error: ${message}`, { level: 'warning' });
       return;
     }
-
-    navigate('/home', { replace: true });
+    navigate('/accounts', { replace: true });
   };
 
   return (
-    <div className='flex flex-v-center flex-h-center h-full'>
-      <div className='bg' />
-      <div className='text'>
-        <h1 className='text-shadow'>Hello! 👋</h1>
-        <p className='text-shadow'>Please sign in to your account or sign up a new account.</p>
-
-        <form method='post' action='/' className='form' noValidate onSubmit={handleSubmit}>
-          <div className='form-line'>
-            <div className='label-line'>
-              <label htmlFor='email' className='text-shadow'>
-                Email
-              </label>
-            </div>
-            <Input
-              required
-              tabIndex={0}
-              name='email'
-              type='email'
-              value={email}
-              autoComplete={false}
-              placeholder='Please enter your email'
-              error={emailError}
-              onChange={handleEmailChange}
-            />
+    <div className='wf-page wf-signon-page'>
+      <header className='wf-header'>
+        <div className='wf-topbar'>
+          <div className='container flex flex-v-center flex-space-between'>
+            <span className='wf-wordmark no-select'>WELLS FARGO</span>
+            <span className='wf-greeting'>Online Banking</span>
           </div>
-          <div className='form-line'>
-            <div className='label-line flex flex-h-center flex-space-between'>
-              <label htmlFor='password' className='text-shadow'>
-                Password
-              </label>
-              <Link to='/' className='text-shadow'>
-                Forgot password?
-              </Link>
-            </div>
-            <Input
-              required
-              tabIndex={0}
-              name='password'
-              type='password'
-              autoComplete={false}
-              placeholder='Please enter your password'
-            />
-          </div>
-          <div className='form-line'>
-            <Button type='submit' text='Sign in' tabIndex={0} />
-          </div>
-        </form>
-
-        <div className='links'>
-          <a href='/' className='text-shadow'>
-            Click here
-          </a>
-          &nbsp;
-          <span className='text-shadow'>if you don&apos;t have an account</span>
         </div>
-      </div>
+        <div className='wf-stripe' aria-hidden='true' />
+      </header>
+
+      <main className='container wf-main flex flex-h-center'>
+        <section className='wf-signon' aria-labelledby='signon-title'>
+          <h1 id='signon-title'>Sign On</h1>
+          <p className='wf-muted'>Demo environment - any username and password will sign you on.</p>
+          <form className='wf-form' onSubmit={handleSubmit} noValidate>
+            <div className='form-line'>
+              <label htmlFor='username'>Username</label>
+              <input
+                id='username'
+                name='username'
+                type='text'
+                className='input'
+                autoComplete='username'
+                value={username}
+                onChange={(event) => {
+                  setUsername(event.target.value);
+                  setError('');
+                }}
+              />
+            </div>
+            <div className='form-line'>
+              <label htmlFor='password'>Password</label>
+              <input
+                id='password'
+                name='password'
+                type='password'
+                className='input'
+                autoComplete='current-password'
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setError('');
+                }}
+              />
+            </div>
+            {error && (
+              <p className='input-error-message' role='alert'>
+                {error}
+              </p>
+            )}
+            <div className='form-line'>
+              <button type='submit' className='button wf-button-primary'>
+                Sign On
+              </button>
+            </div>
+          </form>
+          <div className='wf-signon-links'>
+            <a href='#forgot' onClick={(event) => event.preventDefault()}>
+              Forgot username or password?
+            </a>
+            <a href='#enroll' onClick={(event) => event.preventDefault()}>
+              Enroll now
+            </a>
+          </div>
+        </section>
+      </main>
     </div>
   );
 };

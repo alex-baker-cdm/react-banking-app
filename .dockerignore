@@ -1,0 +1,8 @@
+node_modules
+build
+infra
+ios
+.git
+.github
+screenshots
+*.md

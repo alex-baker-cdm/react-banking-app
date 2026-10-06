@@ -22,3 +22,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .envrc
+
+# ios
+ios/WellsBanking/build
+ios/WellsBanking/*.xcodeproj
+
+# terraform
+infra/.terraform
+infra/build
+infra/*.tfstate*

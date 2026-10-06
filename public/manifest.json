@@ -1,6 +1,6 @@
 {
-  "short_name": "Banking App",
-  "name": "Banking App Sample",
+  "short_name": "Online Banking",
+  "name": "Online Banking Demo",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#d71e28",
   "background_color": "#ffffff"
 }
