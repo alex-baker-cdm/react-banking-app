@@ -31,7 +31,9 @@ const Statements: React.FC = () => {
   return (
     <Layout>
       <h1 className='wf-page-title'>Statements &amp; Documents</h1>
-      <p className='wf-page-subtitle'>Download or view statements for {selected_account?.name}.</p>
+      <p className='wf-page-subtitle'>
+        Download or view monthly statements for {selected_account?.name}.
+      </p>
       <section className='wf-panel'>
         <div className='flex'>
           <button type='button' className='wf-button' onClick={() => download('pdf')}>
