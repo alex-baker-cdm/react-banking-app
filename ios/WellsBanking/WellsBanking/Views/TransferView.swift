@@ -119,7 +119,10 @@ struct TransferView: View {
     private func submit() async {
         submitting = true
         fieldError = nil
-        defer { submitting = false }
+        defer {
+            submitting = false
+            if receipt == nil && failure == nil && pendingPrefill != nil { reset() }
+        }
         do {
             receipt = try await store.transfer(TransferRequest(fromAccountId: fromAccountId, toAccountId: toAccountId, amount: amount, memo: memo))
         } catch let error as ApiError {
