@@ -20,7 +20,7 @@
 
 ### How it was run and what was verified
 
-- `npm run test:server` (10/10 pass), `npm run build`, then `PORT=8080 node server/index.js` with stdout/stderr captured to files so log lines could be matched to responses.
+- `npm run test:server` (9 test cases in `server/test/*.test.js`, all passing; `node --test` reports "# tests 10" because it also counts `server/test/helpers.js` as a file), `npm run build`, then `PORT=8080 node server/index.js` with stdout/stderr captured to files so log lines could be matched to responses.
 - Probes: unauthenticated reads of every route, id swapping on `/api/accounts/:id`, empty / malformed / wrong-content-type / 200 kB bodies, boolean and exponent `amount`, object and 90 kB `memo`, HTML in `memo`, prototype-pollution body, replayed POST with an `Idempotency-Key`, the known cc-3309 500 (balances before/after), transfer _from_ a credit account, CORS preflight, non-UUID `x-correlation-id`, 100 back-to-back requests, path traversal against `express.static`, three $0.10 transfers for float drift.
 - Static: `npm audit --json`, `npm run eslint`, `npx prettier --check .`, `npm run typecheck`, `git log -p -- server/routes`, review of `Dockerfile`, `infra/*.tf`, `infra/lambda/alerts.py`, `.github/workflows/*.yml`, `ios/WellsBanking/WellsBanking/{ApiClient.swift,Info.plist}`.
 - Nothing in the repository was modified; the only additions are the two files under `audit/`.
@@ -50,11 +50,11 @@ Outbound HTTP calls (consumer side):
 
 ### A. Contract & design
 
-| id       | severity | title                                                                                        | file:lines                                                                                                                                                                   | effort |
-| -------- | -------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| RBA-A-01 | medium   | No machine-readable API contract (OpenAPI); two hand-maintained clients duplicate the schema | `src/api/types.ts; ios/WellsBanking/WellsBanking/Models.swift; server/routes/accounts.js; server/routes/transfers.js` (types.ts 82-128; accounts.js 7-21; transfers.js 7-30) | M      |
-| RBA-A-02 | high     | POST /api/transfers is not idempotent - a retried request moves money twice                  | `server/routes/transfers.js; server/services/transfers.js` (transfers.js 7-30; services/transfers.js 65-97)                                                                  | M      |
-| RBA-A-03 | low      | No API version in the path and no pagination on the transactions collection                  | `server/app.js; server/routes/accounts.js` (app.js 28-29; accounts.js 17-21)                                                                                                 | S      |
+| id       | severity | title                                                                                        | file:lines                                                                                                                                                                  | effort |
+| -------- | -------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| RBA-A-01 | medium   | No machine-readable API contract (OpenAPI); two hand-maintained clients duplicate the schema | `src/api/types.ts; ios/WellsBanking/WellsBanking/Models.swift; server/routes/accounts.js; server/routes/transfers.js` (types.ts 26-40; accounts.js 7-21; transfers.js 7-30) | M      |
+| RBA-A-02 | high     | POST /api/transfers is not idempotent - a retried request moves money twice                  | `server/routes/transfers.js; server/services/transfers.js` (transfers.js 7-30; services/transfers.js 65-97)                                                                 | M      |
+| RBA-A-03 | low      | No API version in the path and no pagination on the transactions collection                  | `server/app.js; server/routes/accounts.js` (app.js 28-29; accounts.js 17-21)                                                                                                | S      |
 
 ### B. Authentication & authorization
 
@@ -104,11 +104,11 @@ Outbound HTTP calls (consumer side):
 ### RBA-A-01 - No machine-readable API contract (OpenAPI); two hand-maintained clients duplicate the schema
 
 **Severity:** medium · **Area:** A (Contract & design) · **Effort:** M  
-**File:** `src/api/types.ts; ios/WellsBanking/WellsBanking/Models.swift; server/routes/accounts.js; server/routes/transfers.js` · **Lines:** types.ts 82-128; accounts.js 7-21; transfers.js 7-30
+**File:** `src/api/types.ts; ios/WellsBanking/WellsBanking/Models.swift; server/routes/accounts.js; server/routes/transfers.js` · **Lines:** types.ts 26-40; accounts.js 7-21; transfers.js 7-30
 
 **Evidence**
 
-`grep -rln 'openapi\|swagger' --include=*.{json,yaml,yml,md} .` (excluding node_modules) returns nothing; no spec, no Spectral lint, no contract-test generator. The four mounted routes (GET /health, GET /api/accounts, GET /api/accounts/:id, GET /api/accounts/:id/transactions, POST /api/transfers) are typed independently in src/api/types.ts (TypeScript) and ios/.../Models.swift (Swift). Verified at runtime that the server already returns a field the TS type does not model: POST /api/transfers echoes `memo` as whatever JSON type was sent (object `{"a":1}` in the transcript) while TransferReceipt.memo is `string`.
+`grep -rln 'openapi\|swagger' --include=*.{json,yaml,yml,md} .` (excluding node_modules) returns nothing; no spec, no Spectral lint, no contract-test generator. The five mounted routes (GET /health, GET /api/accounts, GET /api/accounts/:id, GET /api/accounts/:id/transactions, POST /api/transfers) are typed independently in src/api/types.ts (TypeScript) and ios/.../Models.swift (Swift). Verified at runtime that the server already returns a field the TS type does not model: POST /api/transfers echoes `memo` as whatever JSON type was sent (object `{"a":1}` in the transcript) while TransferReceipt.memo is `string`.
 
 **Remediation**
 
@@ -424,7 +424,7 @@ Tool versions: Node v20.18.1, npm 10.8.2, curl 7.81.0, Python 3.10.12 (Ubuntu 22
 
 ```
 git fetch origin master && git checkout master
-npm run test:server                         # 10 pass
+npm run test:server                         # 9 test cases pass (node --test prints "# tests 10": helpers.js is counted as a file)
 npm run eslint                              # clean
 npx prettier --check .                      # clean
 npm run typecheck                           # clean after a fresh `npm ci --legacy-peer-deps` (the snapshot's node_modules lacked @types/jest)
