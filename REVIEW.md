@@ -30,7 +30,7 @@ Scope: the React web app (`src/`), the Express API (`server/`), the iOS app (`io
 ## 3. Observability (OBS)
 
 - **OBS-01 [blocking]** Server code uses `server/logger.js` (structured JSON) only. `console.*` is prohibited in `server/` and `src/` (ESLint `no-console`). Client-side diagnostics go to Sentry.
-- **OBS-02 [blocking]** Every server log line and every error response carries the request `correlationId` from `requestContext`.
+- **OBS-02 [blocking]** Every request-scoped server log line and every error response carries the request `correlationId` from `requestContext`. Process lifecycle logs (startup, shutdown, config) are exempt but must still go through `server/logger.js`.
 - **OBS-03 [blocking]** Errors are never swallowed. `catch (e) {}` and `.catch(() => {})` are prohibited; report with `Sentry.captureException(err, { tags })` on the client or `next(err)` on the server, and show the user a recoverable state.
 - **OBS-04** Pages that load data expose loading, empty, and error states; a failed fetch must not leave the page blank.
 
