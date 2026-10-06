@@ -16,6 +16,7 @@ jobs:
           cache: npm
       - run: npm ci --legacy-peer-deps
       - run: npm run eslint
+      - run: npx prettier --check src server
       - run: npm run typecheck
       - run: npm run test:server
       - run: npx react-scripts test --watchAll=false

@@ -42,6 +42,7 @@ def handler(event, _context):
     logGroup = payload.get("logGroup", APP_LOG_GROUP)
     logStream = payload.get("logStream", "")
     opened = []
+    failed = []
 
     for logEvent in payload.get("logEvents", []):
         incident = parseIncident(logEvent.get("message", ""))
@@ -49,12 +50,17 @@ def handler(event, _context):
             continue
         incident["logGroup"] = logGroup
         incident["logStream"] = logStream
-        session = openSession(incident)
+        try:
+            session = openSession(incident)
+        except Exception:  # noqa: BLE001 - one bad event must not fail (and replay) the whole batch
+            log.exception("could not open Devin session for correlationId=%s", incident.get("correlationId"))
+            failed.append(incident.get("correlationId"))
+            continue
         if session:
             opened.append({"correlationId": incident.get("correlationId"), "sessionUrl": session.get("url")})
 
-    log.info("processed %d log events, opened %d Devin sessions: %s", len(payload.get("logEvents", [])), len(opened), json.dumps(opened))
-    return {"ok": True, "opened": opened}
+    log.info("processed %d log events, opened %d Devin sessions (%d failed): %s", len(payload.get("logEvents", [])), len(opened), len(failed), json.dumps(opened))
+    return {"ok": not failed, "opened": opened, "failed": failed}
 
 
 def decodeLogsPayload(event: dict) -> dict:
@@ -77,7 +83,7 @@ def parseIncident(message: str) -> dict | None:
 
 
 def devinApiKey() -> str | None:
-    if "key" not in _apiKeyCache:
+    if not _apiKeyCache.get("key"):
         value = secrets.get_secret_value(SecretId=DEVIN_KEY_SECRET_ARN).get("SecretString", "").strip()
         _apiKeyCache["key"] = None if not value or value == PLACEHOLDER else value
     return _apiKeyCache["key"]

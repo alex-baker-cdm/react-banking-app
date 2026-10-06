@@ -44,7 +44,10 @@ const TransferForm: React.FC<IProps> = ({ accounts, submitting, fieldError, onSu
           name='fromAccountId'
           className='input'
           value={fromAccountId}
-          onChange={(event) => setFromAccountId(event.target.value)}
+          onChange={(event) => {
+            setFromAccountId(event.target.value);
+            if (event.target.value === toAccountId) setToAccountId('');
+          }}
         >
           {accounts.filter(canDebit).map((account) => (
             <option key={account.id} value={account.id}>

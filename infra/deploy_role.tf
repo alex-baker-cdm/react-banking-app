@@ -50,6 +50,11 @@ resource "aws_iam_role_policy" "githubDeploy" {
         Action   = ["apprunner:StartDeployment", "apprunner:DescribeService", "apprunner:ListOperations"]
         Resource = aws_apprunner_service.app.arn
       },
+      {
+        Effect   = "Allow"
+        Action   = ["apprunner:ListServices"]
+        Resource = "*"
+      },
     ]
   })
 }

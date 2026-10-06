@@ -44,12 +44,15 @@ jobs:
       - name: Roll App Runner and wait
         run: |
           arn="$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$APP_RUNNER_SERVICE_NAME'].ServiceArn" --output text)"
-          aws apprunner start-deployment --service-arn "$arn" >/dev/null || true
+          operation="$(aws apprunner start-deployment --service-arn "$arn" --query OperationId --output text)"
           for _ in $(seq 1 60); do
-            status="$(aws apprunner describe-service --service-arn "$arn" --query 'Service.Status' --output text)"
-            echo "status=$status"
-            [ "$status" = "RUNNING" ] && exit 0
+            status="$(aws apprunner list-operations --service-arn "$arn" --query "OperationSummaryList[?Id=='$operation'].Status" --output text)"
+            echo "deployment $operation: $status"
+            case "$status" in
+              SUCCEEDED) exit 0 ;;
+              FAILED|ROLLBACK_SUCCEEDED|ROLLBACK_FAILED) echo "App Runner deployment failed ($status)" >&2; exit 1 ;;
+            esac
             sleep 10
           done
-          echo "App Runner did not reach RUNNING" >&2
+          echo "App Runner deployment did not finish in time" >&2
           exit 1

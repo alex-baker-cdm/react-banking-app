@@ -30,4 +30,5 @@ ios/WellsBanking/*.xcodeproj
 # terraform
 infra/.terraform
 infra/build
+infra/*.zip
 infra/*.tfstate*
