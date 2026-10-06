@@ -81,3 +81,56 @@ test('POST /api/transfers rejects same-account transfers', async () => {
     await server.close();
   }
 });
+
+test('POST /api/transfers pays a credit card and reduces its balance', async () => {
+  const server = await startTestServer();
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-4471',
+      toAccountId: 'cc-3309',
+      amount: '35.00',
+      memo: 'Minimum payment',
+    });
+    assert.equal(status, 201);
+    assert.equal(body.transfer.from.availableBalance, 4791.12);
+    assert.equal(body.transfer.to.currentBalance, 1249.57);
+    assert.equal(body.transfer.to.availableCredit, 8750.43);
+
+    const history = await server.request('GET', '/api/accounts/cc-3309/transactions');
+    assert.match(
+      history.body.transactions[0].description,
+      /from Everyday Checking .*Minimum payment/
+    );
+  } finally {
+    await server.close();
+  }
+});
+
+test('POST /api/transfers leaves balances untouched when the To account cannot be credited', async () => {
+  const accounts = [
+    {
+      id: 'chk-1',
+      type: 'checking',
+      name: 'Checking',
+      lastFour: '0001',
+      availableBalance: 100,
+      currentBalance: 100,
+    },
+    { id: 'brk-1', type: 'brokerage', name: 'Brokerage', lastFour: '0002', currentBalance: 0 },
+  ];
+  const server = await startTestServer({ accounts, transactions: [] });
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-1',
+      toAccountId: 'brk-1',
+      amount: 10,
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'ValidationError');
+    assert.equal(body.error.field, 'toAccountId');
+    assert.equal(accounts[0].availableBalance, 100);
+    assert.equal(accounts[0].currentBalance, 100);
+  } finally {
+    await server.close();
+  }
+});
