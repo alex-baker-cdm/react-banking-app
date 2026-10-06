@@ -1,101 +1,77 @@
-# Code Review Guidelines
+# Enterprise Engineering Standards — Digital Banking Platform
 
-This document defines the best practices that Devin Review enforces for this repository.
+Devin Review enforces this document on every pull request. Each rule has an ID; review comments cite the ID so authors can trace a finding back to the standard. Rules marked **[blocking]** must be fixed before merge; others are advisory.
+
+Scope: the React web app (`src/`), the Express API (`server/`), the iOS app (`ios/`), infrastructure (`infra/`), and CI (`.github/`).
 
 ---
 
-## Naming Conventions
+## 1. Security (SEC)
 
-- Use **camelCase** for variables, functions, props, and hook names.
-- Use **PascalCase** for component names, interfaces, and type aliases.
-- Prefix interface-only prop types with `I` (e.g. `IProps`) **or** use a descriptive suffix like `Props` — be consistent within a file.
-- File names must match the default export: `Balance.tsx` exports `Balance`.
+- **SEC-01 [blocking]** No secrets in source. API keys, tokens, passwords, and signing keys never appear in code, tests, fixtures, or client bundles — anything under `src/` ships to the browser. Use environment variables, AWS Secrets Manager, or GitHub secrets. Sentry DSNs are the only sanctioned exception.
+- **SEC-02 [blocking]** Credentials never travel in URLs. No `?key=`, `?token=`, or similar query parameters; URLs are logged by proxies, browsers, and CloudWatch. Use the `Authorization` header or a session cookie.
+- **SEC-03 [blocking]** Never render untrusted data as HTML. `dangerouslySetInnerHTML`, `innerHTML`, and server-side string-built HTML are prohibited. Transaction descriptions, memos, and account names are customer-influenced data.
+- **SEC-04 [blocking]** No customer data in logs or console. Account numbers (including last four), balances, names, emails, phone numbers, and transaction detail must not be passed to `console.*`, `logger.*`, or Sentry `extra`. Log identifiers (`accountId`, `correlationId`) only.
+- **SEC-05 [blocking]** Validate every input with an allowlist. Route params, query strings, and bodies are checked before use (e.g. `format` must be one of a fixed set). Reject with a 4xx `ValidationError`; never fall through to a 500.
+- **SEC-06 [blocking]** Never leak internals to clients. Error responses contain the standard envelope only (SEC-06 ↔ API-02) — no stack traces, exception messages, file paths, or dependency names.
+- **SEC-07** Export formats that reach spreadsheets (CSV/TSV) escape cells starting with `=`, `+`, `-`, `@` to prevent formula injection.
+- **SEC-08** Dependencies: no new runtime dependency without a named owner in the PR description; resolve critical/high SCA findings before merge.
 
-## Component Architecture
+## 2. API-First Contract (API)
 
-- Define components as **arrow functions** with explicit `React.FC<Props>` typing.
-- Keep components small and single-responsibility. A component file should not exceed ~200 lines; extract sub-components when it does.
-- Pages (`src/pages/`) are route-level containers that compose components — they should contain minimal logic.
-- Shared UI lives in `src/components/`; each component gets its own directory (e.g. `Card/Card.tsx`).
-- Co-locate unit tests in a `__tests__/` subdirectory next to the component they test.
+- **API-01 [blocking]** Every `/api/*` route is registered under `server/routes/`, mounted in `server/app.js`, and covered by at least one contract test in `server/test/` (status code, envelope shape, error path).
+- **API-02 [blocking]** Uniform envelope. Success: `{ <resource>: ... }`. Failure: delegate to `errorHandler` via `next(err)` using the typed errors in `server/errors.js` so the client receives `{ error: { code, message, correlationId } }`. Handlers never call `res.status(500)` directly.
+- **API-03 [blocking]** Resource lookups that can miss must return `NotFoundError` (404), never dereference `undefined`.
+- **API-04** Representation is chosen by path or `Accept` header, not by a free-form query flag. If a query parameter is unavoidable it is validated (SEC-05).
+- **API-05** Authentication/authorization is enforced by middleware, never inline in a handler, and never by comparing against a literal.
+- **API-06** Breaking changes require a new versioned path (`/api/v2/...`) and a deprecation note; existing clients (web, iOS) keep working for one release.
+- **API-07** Handlers are non-blocking: no synchronous filesystem or network calls on the request path.
 
-## TypeScript
+## 3. Observability (OBS)
 
-- Enable and respect `"strict": true`. Do not add `@ts-ignore` or `@ts-expect-error` without a comment justifying why.
-- Do **not** use `any`. Prefer `unknown` and narrow with type guards when the type is genuinely uncertain.
-- Define explicit interfaces or types for all component props — do not use inline object types in `React.FC<{ … }>`.
-- Prefer `interface` for object shapes and `type` for unions/intersections.
+- **OBS-01 [blocking]** Server code uses `server/logger.js` (structured JSON) only. `console.*` is prohibited in `server/` and `src/` (ESLint `no-console`). Client-side diagnostics go to Sentry.
+- **OBS-02 [blocking]** Every server log line and every error response carries the request `correlationId` from `requestContext`.
+- **OBS-03 [blocking]** Errors are never swallowed. `catch (e) {}` and `.catch(() => {})` are prohibited; report with `Sentry.captureException(err, { tags })` on the client or `next(err)` on the server, and show the user a recoverable state.
+- **OBS-04** Pages that load data expose loading, empty, and error states; a failed fetch must not leave the page blank.
 
-## React & Hooks
+## 4. TypeScript & Data Contracts (TS)
 
-- Follow the [Rules of Hooks](https://react.dev/reference/rules/rules-of-hooks): hooks must be called at the top level only.
-- Custom hooks belong in `src/hooks/` and must be prefixed with `use` (e.g. `useScreenLoadMonitor`).
-- Avoid anonymous components; every component should have a named const for easier debugging and stack traces.
-- Do not use `index` as a `key` in lists when items can be reordered or removed.
-- Memoize expensive computations with `useMemo` and stable callbacks with `useCallback` when passed as props to child components.
+- **TS-01 [blocking]** `any` is prohibited. Use the shared types in `src/api/types.ts` (`Account`, `Transaction`, …) or `unknown` narrowed by a type guard.
+- **TS-02 [blocking]** API responses are parsed through `src/api/client.ts`; pages never call `fetch` directly or build API URLs by hand.
+- **TS-03** Identifiers: `camelCase` for variables, functions, props, hooks; `PascalCase` for components, interfaces, types; `UPPER_SNAKE_CASE` only for true compile-time constants.
+- **TS-04** `strict` stays on; no `@ts-ignore` / `@ts-expect-error` without a justification comment.
 
-## Accessibility (a11y)
+## 5. React & UI Consistency (UI)
 
-- Every interactive element must be keyboard-accessible. Clickable `<div>` elements must include `role`, `tabIndex`, and `onKeyDown` handlers.
-- Prefer semantic HTML (`<button>`, `<nav>`, `<main>`, `<form>`) over generic `<div>` wrappers with ARIA roles.
-- Images and icons must have `alt` text or `aria-label`. Decorative SVGs should use `aria-hidden="true"`.
-- Form inputs must have associated `<label>` elements or `aria-label` attributes.
+- **UI-01 [blocking]** Lists use a stable domain key (`transaction.id`), never the array index.
+- **UI-02 [blocking]** Components are named arrow functions typed `React.FC<Props>` with an explicit props interface; no inline prop object types.
+- **UI-03** Reuse the design-system primitives and classes in `public/app.css` (`wf-page-title`, `wf-panel`, `wf-button`, `wf-table`, …). Do not introduce one-off inline styles or new CSS-in-JS.
+- **UI-04** Static assets referenced from JSX must exist under `public/`; images use `alt` text or `aria-hidden="true"` when decorative.
+- **UI-05** Pages (`src/pages/`) compose components and hold minimal logic; data shaping belongs in `src/api/` or hooks in `src/hooks/`.
+- **UI-06** Follow the Rules of Hooks; custom hooks live in `src/hooks/` and start with `use`.
 
-## Styling
+## 6. Accessibility (A11Y)
 
-- Application styles live in `public/app.css`. Do not introduce CSS-in-JS libraries or CSS modules unless the team agrees to migrate.
-- Inline styles are acceptable only for one-off overrides (e.g. dynamic values). Repeated inline styles should be extracted to a CSS class.
-- Use the existing utility classes (`flex`, `flex-v-center`, `flex-h-center`, `flex-space-between`, `center`, `text-shadow`, `no-select`) before creating new ones.
+- **A11Y-01 [blocking]** Interactive elements are native (`<button>`, `<a>`, `<input>`) or carry `role`, `tabIndex`, and keyboard handlers.
+- **A11Y-02** Form controls have associated labels; tables have header cells; colour is never the only signal.
 
-## Security
+## 7. Quality & Test Engineering (TEST)
 
-- Never commit secrets, API keys, tokens, or credentials. Use environment variables and `.env` files (which must be in `.gitignore`).
-- Sentry DSNs are public by design but all other keys must stay out of source.
-- Sanitize and validate all user input before rendering. Use controlled components for form inputs to prevent injection.
-- Keep dependencies up to date. The CI pipeline runs an SCA vulnerability scan on every PR — resolve critical and high findings before merging.
-- Audit `resolutions` / `overrides` in `package.json` regularly; they exist to patch transitive vulnerabilities and should be removed once the upstream dependency is fixed.
+- **TEST-01 [blocking]** New server behaviour ships with `node:test` coverage in `server/test/` for the success path and each error path.
+- **TEST-02 [blocking]** New pages/components ship with a React Testing Library test covering default, loading, error, and empty states; query by role/label/text.
+- **TEST-03** Tests are never skipped, deleted, or weakened to make CI pass; a regression fix adds a test that fails before and passes after.
+- **TEST-04** Regression tests for production incidents reference the incident `correlationId` in the test name or a comment.
 
-## Error Handling & Observability
+## 8. Delivery & CI/CD (CI)
 
-- Wrap route-level content in `<ErrorBoundary>` so crashes show a user-friendly fallback instead of a white screen.
-- Use `Sentry.captureException` for unexpected runtime errors. Include structured `tags` and `extra` context.
-- Do not swallow errors silently (`catch (e) {}`). At minimum, log or report them.
-- Remove test/debug code (e.g. `SentryTestButton`) before merging to `master`.
+- **CI-01 [blocking]** PRs pass `npm run eslint`, `npx prettier --check .`, `npm run typecheck`, `npm run test:server`, the React test suite, and `npm run build`.
+- **CI-02** One concern per PR. The description states the user-facing change, the risk, and the verification evidence (test output, screenshots, or recording).
+- **CI-03** Infrastructure and workflow changes (`infra/`, `.github/`) are reviewed for least privilege; IAM policies name resources, not `*`, unless the API requires it.
+- **CI-04** Generated artifacts (`build/`, `__pycache__/`, `*.zip`) are never committed.
+- **CI-05** Install with `npm ci --legacy-peer-deps`; lockfile changes are explained in the PR.
 
-## Performance
+## 9. Review Conventions
 
-- Use the `useScreenLoadMonitor` hook on data-heavy pages to detect slow renders. Keep the threshold at 3 000 ms unless there is a documented reason to change it.
-- Lazy-load route-level pages with `React.lazy` and `Suspense` when the bundle grows beyond a reasonable size.
-- Avoid re-renders: lift state to the lowest common ancestor and avoid creating new object/array literals inside JSX props.
-
-## Testing
-
-- Write tests with **React Testing Library** (`@testing-library/react`) and **jest-dom** matchers.
-- Test user-visible behavior, not implementation details. Query by role, label, or text — avoid `querySelector` and test-ids when a better query exists.
-- Each component directory should have a `__tests__/` folder. Aim for coverage of all user-facing states (default, loading, error, empty).
-
-## Imports & Module Organization
-
-- Group imports in this order, separated by a blank line:
-  1. External libraries (`react`, `react-router-dom`, `@sentry/react`)
-  2. Internal components / pages
-  3. Hooks and utilities
-  4. Types / interfaces (if imported from another file)
-- Use relative paths for intra-project imports. Do not use path aliases unless configured in both `tsconfig.json` and the bundler.
-
-## Git & Pull Requests
-
-- PRs must pass ESLint (`npm run eslint`) and Prettier (`npm run prettier`) checks with zero errors before review.
-- Keep PRs focused: one feature or fix per PR. If a refactor is needed, split it into its own PR.
-- Write descriptive commit messages in imperative mood (e.g. "Add transfer confirmation step").
-- The CI SCA vulnerability check must pass. If it fails on a transitive dependency, add a `resolutions`/`overrides` entry and document why.
-
-## Dependency Management
-
-- Install dependencies with `--legacy-peer-deps` due to known peer conflicts in the current dependency tree.
-- Do not add new runtime dependencies without team discussion. Prefer lightweight or built-in solutions.
-- Pin major versions in `package.json` (e.g. `"react": "^19.2.1"`) and commit `package-lock.json` / `yarn.lock`.
-
-## Console Output
-
-- `no-console` is set to `warn` in ESLint. Remove or replace `console.log` calls before merging — use Sentry for production diagnostics.
+- Comments cite a rule ID (`SEC-02`) and, for blocking findings, propose the compliant alternative.
+- A PR with any unresolved **[blocking]** finding is not mergeable.
+- Rules are changed through a PR to this file with a rationale; the review bot picks up the new standard on the next run.
