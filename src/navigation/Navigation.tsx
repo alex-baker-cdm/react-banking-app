@@ -5,6 +5,7 @@ import Signin from '../pages/Signin';
 import Accounts from '../pages/Accounts';
 import AccountDetail from '../pages/AccountDetail';
 import Transfer from '../pages/Transfer';
+import Statements from '../pages/Statements';
 
 const Navigation: React.FC = () => (
   <Routes>
@@ -12,6 +13,7 @@ const Navigation: React.FC = () => (
     <Route path='/accounts' element={<Accounts />} />
     <Route path='/accounts/:id' element={<AccountDetail />} />
     <Route path='/transfer' element={<Transfer />} />
+    <Route path='/statements' element={<Statements />} />
     <Route path='*' element={<Navigate to='/' replace />} />
   </Routes>
 );

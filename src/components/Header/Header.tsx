@@ -24,6 +24,9 @@ const Header: React.FC = () => (
         <NavLink to='/transfer' className={({ isActive }) => (isActive ? 'active' : '')}>
           Transfer &amp; Pay
         </NavLink>
+        <NavLink to='/statements' className={({ isActive }) => (isActive ? 'active' : '')}>
+          Statements
+        </NavLink>
         <a href='#plan' onClick={(event) => event.preventDefault()}>
           Plan &amp; Learn
         </a>
