@@ -31,6 +31,14 @@ struct Account: Codable, Identifiable, Hashable {
 
     var headlineBalance: Double { type.isDeposit ? (availableBalance ?? currentBalance) : currentBalance }
 
+    var minimumDueAmount: Double? {
+        switch type {
+        case .credit: return minimumPaymentDue
+        case .loan: return nextPaymentAmount
+        case .checking, .savings: return nil
+        }
+    }
+
     var headlineLabel: String {
         switch type {
         case .checking, .savings: return "Available balance"

@@ -10,6 +10,7 @@ struct TransferView: View {
     @State private var fieldError: ApiError?
     @State private var receipt: TransferReceipt?
     @State private var failure: ApiError?
+    @State private var prefillNote: String?
 
     private var fromOptions: [Account] { store.accounts.filter { $0.type.isDeposit } }
     private var toOptions: [Account] { store.accounts.filter { $0.id != fromAccountId } }
@@ -46,12 +47,20 @@ struct TransferView: View {
         .scrollDismissesKeyboard(.interactively)
         .onAppear {
             if fromAccountId.isEmpty { fromAccountId = fromOptions.first?.id ?? "" }
+            applyPrefill()
         }
+        .onChange(of: store.transferPrefill) { _, _ in applyPrefill() }
     }
 
     private var form: some View {
         Card {
             VStack(alignment: .leading, spacing: 18) {
+                if let prefillNote {
+                    Label(prefillNote, systemImage: "bolt.fill")
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(Theme.green)
+                        .accessibilityIdentifier("prefillNote")
+                }
                 field("From", error: fieldError?.field == "fromAccountId" ? fieldError?.message : nil) {
                     Picker("From", selection: $fromAccountId) {
                         ForEach(fromOptions) { account in
@@ -123,8 +132,22 @@ struct TransferView: View {
         receipt = nil
         failure = nil
         fieldError = nil
+        prefillNote = nil
         amount = ""
         memo = ""
         toAccountId = ""
+    }
+
+    private func applyPrefill() {
+        guard let prefill = store.transferPrefill else { return }
+        store.transferPrefill = nil
+        reset()
+        if fromAccountId.isEmpty || fromAccountId == prefill.toAccountId {
+            fromAccountId = fromOptions.first?.id ?? ""
+        }
+        toAccountId = prefill.toAccountId
+        amount = String(format: "%.2f", prefill.amount)
+        memo = "Minimum payment"
+        prefillNote = "Prefilled from Pay minimum due on \(prefill.sourceLabel)"
     }
 }

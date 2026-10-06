@@ -17,3 +17,6 @@ xcodebuild -project WellsBanking.xcodeproj -target WellsBanking -sdk iphonesimul
 ```
 
 Use `-target` + `-sdk iphonesimulator` (not `-scheme` + `-destination`) on machines that only have the simulator SDK.
+
+Gotchas: `xcodegen generate` rewrites `WellsBanking/Info.plist` (reorders keys, inlines versions) - discard that diff before committing. Launch with
+`SIMCTL_CHILD_BANKING_API_BASE_URL=<url> xcrun simctl launch booted com.demo.banking.wells` to point an installed build at a different API.
