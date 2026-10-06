@@ -11,7 +11,7 @@ struct TransferView: View {
     @State private var receipt: TransferReceipt?
     @State private var failure: ApiError?
     @State private var prefillNote: String?
-    @State private var submissionId = 0
+    @State private var pendingPrefill: TransferPrefill?
 
     private var fromOptions: [Account] { store.accounts.filter { $0.type.isDeposit } }
     private var toOptions: [Account] { store.accounts.filter { $0.id != fromAccountId } }
@@ -119,25 +119,17 @@ struct TransferView: View {
     private func submit() async {
         submitting = true
         fieldError = nil
-        submissionId += 1
-        let id = submissionId
-        defer { if id == submissionId { submitting = false } }
+        defer { submitting = false }
         do {
-            let result = try await store.transfer(TransferRequest(fromAccountId: fromAccountId, toAccountId: toAccountId, amount: amount, memo: memo))
-            guard id == submissionId else { return }
-            receipt = result
+            receipt = try await store.transfer(TransferRequest(fromAccountId: fromAccountId, toAccountId: toAccountId, amount: amount, memo: memo))
         } catch let error as ApiError {
-            guard id == submissionId else { return }
             if error.isServerError { failure = error } else { fieldError = error }
         } catch {
-            guard id == submissionId else { return }
             failure = ApiError(status: 0, code: "UNKNOWN", message: error.localizedDescription, field: nil, correlationId: nil)
         }
     }
 
     private func reset() {
-        submissionId += 1
-        submitting = false
         receipt = nil
         failure = nil
         fieldError = nil
@@ -145,12 +137,24 @@ struct TransferView: View {
         amount = ""
         memo = ""
         toAccountId = ""
+        if let prefill = pendingPrefill {
+            pendingPrefill = nil
+            fill(prefill)
+        }
     }
 
     private func applyPrefill() {
         guard let prefill = store.transferPrefill else { return }
         store.transferPrefill = nil
+        if submitting || receipt != nil || failure != nil {
+            pendingPrefill = prefill
+            return
+        }
         reset()
+        fill(prefill)
+    }
+
+    private func fill(_ prefill: TransferPrefill) {
         if fromAccountId.isEmpty || fromAccountId == prefill.toAccountId {
             fromAccountId = fromOptions.first?.id ?? ""
         }
