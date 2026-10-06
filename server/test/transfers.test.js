@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { startTestServer } = require('./helpers');
 const { parseAmount } = require('../services/transfers');
+const { seedAccounts, seedTransactions } = require('../data/accounts');
 
 test('parseAmount accepts formatted currency strings', () => {
   assert.equal(parseAmount('$1,250.00'), 1250);
@@ -46,6 +47,56 @@ test('POST /api/transfers pays down a loan', async () => {
     });
     assert.equal(status, 201);
     assert.equal(body.transfer.to.currentBalance, 310215.7);
+  } finally {
+    await server.close();
+  }
+});
+
+test('POST /api/transfers pays a credit card from checking', async () => {
+  const server = await startTestServer();
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-4471',
+      toAccountId: 'cc-3309',
+      amount: '35.00',
+      memo: 'Minimum payment',
+    });
+    assert.equal(status, 201);
+    assert.equal(body.transfer.from.availableBalance, 4791.12);
+    assert.equal(body.transfer.from.currentBalance, 4791.12);
+    assert.equal(body.transfer.to.currentBalance, 1249.57);
+    assert.equal(body.transfer.to.availableCredit, 8750.43);
+
+    const history = await server.request('GET', '/api/accounts/cc-3309/transactions');
+    assert.match(
+      history.body.transactions[0].description,
+      /from Everyday Checking .*Minimum payment/
+    );
+    assert.equal(history.body.transactions[0].amount, 35);
+  } finally {
+    await server.close();
+  }
+});
+
+test('POST /api/transfers does not debit the From account when the credit cannot be posted', async () => {
+  const accounts = [
+    ...seedAccounts(),
+    { id: 'brk-7001', type: 'brokerage', name: 'Brokerage', lastFour: '7001', currentBalance: 0 },
+  ];
+  const transactions = seedTransactions();
+  const server = await startTestServer({ accounts, transactions });
+  try {
+    const { status } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-4471',
+      toAccountId: 'brk-7001',
+      amount: '35.00',
+    });
+    assert.notEqual(status, 201);
+
+    const checking = accounts.find((account) => account.id === 'chk-4471');
+    assert.equal(checking.availableBalance, 4826.12);
+    assert.equal(checking.currentBalance, 4826.12);
+    assert.equal(transactions.length, seedTransactions().length);
   } finally {
     await server.close();
   }

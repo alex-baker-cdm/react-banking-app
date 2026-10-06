@@ -2,10 +2,12 @@ const { randomUUID } = require('node:crypto');
 const { ValidationError, NotFoundError } = require('../errors');
 
 // How a transfer posts to each account type. Deposit accounts move availableBalance/currentBalance;
-// loans track the outstanding principal, so a payment reduces currentBalance.
+// loans and credit cards track the amount owed, so a payment reduces currentBalance. `offset` fields move the
+// opposite way (a card payment frees up the same amount of availableCredit).
 const POSTING_RULES = {
   checking: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
   savings: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
+  credit: { credit: 'currentBalance', direction: -1, offset: 'availableCredit' },
   loan: { credit: 'currentBalance', direction: -1 },
 };
 
@@ -24,23 +26,44 @@ function parseAmount(raw) {
   return amount;
 }
 
-function postCredit(account, amount) {
+function postingRulesFor(account) {
   const rules = POSTING_RULES[account.type];
-  const direction = rules.direction ?? 1;
-  account[rules.credit] = roundMoney(account[rules.credit] + direction * amount);
-  if (rules.mirror) {
-    account[rules.mirror] = roundMoney(account[rules.mirror] + direction * amount);
+  if (!rules) {
+    throw new Error(`No posting rules for account type "${account.type}" (account ${account.id}).`);
   }
+  return rules;
 }
 
-function postDebit(account, amount) {
-  const rules = POSTING_RULES[account.type];
+function assertCanDebit(account, amount) {
+  const rules = postingRulesFor(account);
   if (!rules.debit) {
     throw new ValidationError(`You can't transfer money out of a ${account.type} account.`, 'fromAccountId');
   }
   if (account[rules.debit] < amount) {
     throw new ValidationError('The amount exceeds the available balance of the From account.', 'amount');
   }
+}
+
+function assertCanCredit(account) {
+  if (!postingRulesFor(account).credit) {
+    throw new ValidationError(`You can't transfer money into a ${account.type} account.`, 'toAccountId');
+  }
+}
+
+function postCredit(account, amount) {
+  const rules = postingRulesFor(account);
+  const direction = rules.direction ?? 1;
+  account[rules.credit] = roundMoney(account[rules.credit] + direction * amount);
+  if (rules.mirror) {
+    account[rules.mirror] = roundMoney(account[rules.mirror] + direction * amount);
+  }
+  if (rules.offset) {
+    account[rules.offset] = roundMoney(account[rules.offset] - direction * amount);
+  }
+}
+
+function postDebit(account, amount) {
+  const rules = postingRulesFor(account);
   account[rules.debit] = roundMoney(account[rules.debit] - amount);
   if (rules.mirror) {
     account[rules.mirror] = roundMoney(account[rules.mirror] - amount);
@@ -66,6 +89,9 @@ function createTransferService({ accounts, transactions }) {
     const from = findAccount(fromAccountId, 'fromAccountId');
     const to = findAccount(toAccountId, 'toAccountId');
 
+    // Validate both legs before posting either, so a rejected credit never leaves the From account debited.
+    assertCanDebit(from, amount);
+    assertCanCredit(to);
     postDebit(from, amount);
     postCredit(to, amount);
 
