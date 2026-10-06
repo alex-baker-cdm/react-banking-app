@@ -1,25 +1,18 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 // components
-import Add from '../pages/Add';
-import Home from '../pages/Home';
-import Cards from '../pages/Cards';
 import Signin from '../pages/Signin';
-import Profile from '../pages/Profile';
-import Savings from '../pages/Savings';
-import SendMoney from '../pages/SendMoney';
-import Transactions from '../pages/Transactions';
+import Accounts from '../pages/Accounts';
+import AccountDetail from '../pages/AccountDetail';
+import Transfer from '../pages/Transfer';
 
 const Navigation: React.FC = () => (
   <Routes>
     <Route path='/' element={<Signin />} />
-    <Route path='/add' element={<Add />} />
-    <Route path='/home' element={<Home />} />
-    <Route path='/cards' element={<Cards />} />
-    <Route path='/profile' element={<Profile />} />
-    <Route path='/savings' element={<Savings />} />
-    <Route path='/send' element={<SendMoney />} />
-    <Route path='/transactions' element={<Transactions />} />
+    <Route path='/accounts' element={<Accounts />} />
+    <Route path='/accounts/:id' element={<AccountDetail />} />
+    <Route path='/transfer' element={<Transfer />} />
+    <Route path='*' element={<Navigate to='/' replace />} />
   </Routes>
 );
 

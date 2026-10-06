@@ -1,109 +1,47 @@
-# React Banking App Template
+# Online Banking demo (Wells Fargo-style)
 
-Are you ready to revolutionize the world of online banking? This template is designed to help you create a modern, user-friendly, and visually stunning banking application using React. With its sleek design and cutting-edge technology, this template is the perfect starting point for your next project.
+Retail online-banking web app used for Devin demos: account summary, account activity and a
+Transfer & Pay flow. React (Create React App, strict TypeScript) UI served by a small Express API,
+deployed to AWS App Runner with a CloudWatch -> Lambda -> Devin auto-triage pipeline.
 
-**Key Features**
+```
+browser -> App Runner (Express + React) --stderr JSON--> CloudWatch Logs --filter ERROR--> Lambda --> Devin session
+                                                                                              |-> clones repo
+                                                                                              |-> pulls logs
+                                                                                              |-> reproduces the failure locally on camera
+                                                                                              |-> fixes + tests
+                                                                                              '-> opens PR
+```
 
-- **Responsive Design**: A mobile-first approach ensures a seamless user experience across all devices.
-- **Modern UI**: A clean, intuitive interface that makes banking easy and enjoyable.
-- **Customizable**: Tailor the template to fit your brand's unique style and needs.
-- **Easy Integration**: Integrate with your existing banking systems or third-party services with ease.
+## Run locally
 
-**Get Started**
+```bash
+npm ci --legacy-peer-deps
+npm run build && npm run serve   # Express API + built UI on http://localhost:8080
+```
 
-Whether you're a seasoned developer or just starting out, this template provides a solid foundation for your project. Follow the simple installation steps to get up and running quickly.
+For UI hot reload run `npm run serve` in one terminal and `npm start` in another (CRA proxies `/api` to 8080).
 
-## Support this project
+## Checks
 
-You are free to download, change and use it anywhere. I will regularly update this template with new resources and pages I found on the web. Don't hesitate to participate by sending a PR! Maybe your first on Github :)
+```bash
+npm run eslint
+npm run typecheck
+npm run test:server                       # Express API tests (node:test)
+npx react-scripts test --watchAll=false   # React component tests (Jest + Testing Library)
+```
 
-If you like this resource, please follow me on GitHub. Thank you!
+## Layout
 
-## Demo
+- `src/` - React UI. Pages in `src/pages/`, shared components in `src/components/<Name>/`, API client in `src/api/`.
+- `server/` - Express API: `routes/`, `services/transfers.js` (posting rules), `data/accounts.js` (seed data),
+  `middleware/` (correlation IDs, structured error logging). Tests in `server/test/`.
+- `infra/` - Terraform for ECR, App Runner, the alerts Lambda (`infra/lambda/alerts.py` holds the triage prompt)
+  and the GitHub OIDC deploy role. `scripts/deploy.sh` builds, pushes and applies.
+- `ios/` - SwiftUI companion app (iOS) that talks to the same API.
+- `REVIEW.md` - code review guidelines enforced by Devin Review.
 
-[https://react-banking-app-template.vercel.app](https://react-banking-app-template.vercel.app)
+## Observability
 
-## Screenshots
-
-![Signin](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/signin.png)
-
-![Home](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/home.png)
-
-![Transactions](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/transactions.png)
-
-![Cards](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/cards.png)
-
-![Add](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/addmoney.png)
-
-![Profile](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/profile.png)
-
-![Savings](https://raw.githubusercontent.com/cenksari/react-banking-app-template/master/screenshots/savings.png)
-
-## Installation
-
-1. Clone the project:
-
-   ```bash
-   git clone https://github.com/cenksari/react-banking-app-template.git
-   ```
-
-2. Navigate to the project directory:
-
-   ```bash
-   cd react-banking-app-template
-   ```
-
-3. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-   or
-
-   ```bash
-   yarn install
-   ```
-
-4. Start the application:
-
-   ```bash
-   npm start
-   ```
-
-## Usage
-
-Once the application is started, navigate to [http://localhost:3000](http://localhost:3000) in your browser to test application.
-
-## Error Tracking with Sentry
-
-This application includes [Sentry](https://sentry.io) for error monitoring, performance tracing, and session replay.
-
-**Features:**
-- Automatic error capture and reporting
-- Browser performance tracing
-- Session replay for debugging user issues
-- ErrorBoundary component wrapping the app to catch React errors
-
-**Configuration:**
-
-The Sentry DSN is configured in `src/sentry.ts`. If you fork this repository, replace the DSN with your own from your Sentry project settings.
-
-**Sample Rates (configurable in `src/sentry.ts`):**
-- `tracesSampleRate: 1.0` - Captures 100% of transactions for performance monitoring (reduce in production to manage costs)
-- `replaysSessionSampleRate: 0.1` - Captures 10% of all sessions for replay
-- `replaysOnErrorSampleRate: 1.0` - Captures 100% of sessions with errors for replay
-
-**Note:** The test error button on the Home page is for verifying Sentry integration and should be removed before production deployment.
-
-## Contributing
-
-If you would like to contribute, please create a new branch and submit a pull request with your changes. Review may be needed before acceptance.
-
-## Authors
-
-@cenksari
-
-## License
-
-MIT
+Every request gets an `x-correlation-id`. Unhandled 5xx errors are written to stderr as a single JSON line with
+`level: "ERROR"`, the route, stack trace and request body; the customer sees the same ID as a "Reference ID".
