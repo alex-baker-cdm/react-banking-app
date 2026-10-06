@@ -1,5 +1,24 @@
 const { logger } = require('../logger');
 
+const SENSITIVE_KEY = /pass|secret|token|ssn|cvv|pin|card(number)?$/i;
+const MAX_STRING = 200;
+
+function redact(value, depth = 0) {
+  if (depth > 3) return '[truncated]';
+  if (Array.isArray(value)) return value.slice(0, 20).map((item) => redact(item, depth + 1));
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [
+        key,
+        SENSITIVE_KEY.test(key) ? '[redacted]' : redact(item, depth + 1),
+      ])
+    );
+  }
+  if (typeof value === 'string' && value.length > MAX_STRING)
+    return `${value.slice(0, MAX_STRING)}…`;
+  return value;
+}
+
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
   const statusCode = err.statusCode ?? 500;
@@ -13,7 +32,7 @@ function errorHandler(err, req, res, next) {
       errorName: err.name,
       errorMessage: err.message,
       stack: err.stack,
-      requestBody: req.body,
+      requestBody: redact(req.body),
     });
     res.status(statusCode).json({
       error: {

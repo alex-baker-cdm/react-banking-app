@@ -14,7 +14,7 @@ resource "aws_iam_role" "githubDeploy" {
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" }
-        StringLike   = { "token.actions.githubusercontent.com:sub" = "repo:${var.appRepo}:*" }
+        StringLike   = { "token.actions.githubusercontent.com:sub" = "repo:${var.appRepo}:ref:refs/heads/${var.appBranch}" }
       }
     }]
   })

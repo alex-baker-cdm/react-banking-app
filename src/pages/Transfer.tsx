@@ -41,7 +41,11 @@ const Transfer: React.FC = () => {
       setReceipt(result);
       fetchAccounts()
         .then(setAccounts)
-        .catch(() => undefined);
+        .catch((refreshError: unknown) =>
+          Sentry.captureException(refreshError, {
+            tags: { screen: 'Transfer', phase: 'refreshAfterTransfer' },
+          })
+        );
     } catch (err: unknown) {
       if (err instanceof ApiError && err.status < 500) {
         setFieldError({ field: err.field, message: err.message });

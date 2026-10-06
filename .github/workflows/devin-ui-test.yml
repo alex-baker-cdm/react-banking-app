@@ -11,17 +11,17 @@ jobs:
   sca-vulnerability-check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    
+
     steps:
       - name: Create Devin Session
         id: create-session
         env:
           DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
           DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
-          DEVIN_PLAYBOOK_ID: "playbook-88e89fadd5c141c6bd5e5942b0e31ba8"
+          DEVIN_PLAYBOOK_ID: 'playbook-88e89fadd5c141c6bd5e5942b0e31ba8'
         run: |
           echo "Creating Devin session for SCA vulnerability check..."
-          
+
           RESPONSE=$(curl -s --request POST \
             --url "https://api.devin.ai/v3/organizations/${DEVIN_ORG_ID}/sessions" \
             --header "Authorization: Bearer ${DEVIN_API_KEY}" \
@@ -30,15 +30,15 @@ jobs:
               \"prompt\": \"Run the SCA Vulnerability Check playbook. Repository: ${{ github.repository }}, PR #${{ github.event.pull_request.number }}, Branch: ${{ github.head_ref }}. Clone the repo, checkout the PR branch (${{ github.head_ref }}), run the Snyk SCA scan, and if you find simple fixes, push them to the ${{ github.head_ref }} branch.\",
               \"playbook_id\": \"${DEVIN_PLAYBOOK_ID}\"
             }")
-          
+
           echo "Response: $RESPONSE"
-          
+
           SESSION_ID=$(echo "$RESPONSE" | jq -r '.session_id')
           if [ "$SESSION_ID" == "null" ] || [ -z "$SESSION_ID" ]; then
             echo "Failed to create session"
             exit 1
           fi
-          
+
           DEVIN_ID="devin-${SESSION_ID}"
           echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
           echo "devin_id=$DEVIN_ID" >> $GITHUB_OUTPUT
@@ -53,10 +53,10 @@ jobs:
           SESSION_ID: ${{ steps.create-session.outputs.session_id }}
         run: |
           echo "Waiting for session $DEVIN_ID to complete..."
-          
+
           MAX_ATTEMPTS=75
           ATTEMPT=0
-          
+
           while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
             RESPONSE=$(curl -s --request GET \
               --url "https://api.devin.ai/v3/organizations/${DEVIN_ORG_ID}/sessions/${DEVIN_ID}" \
@@ -88,7 +88,7 @@ jobs:
             ATTEMPT=$((ATTEMPT+1))
             sleep 15
           done
-          
+
           if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
             echo "Session timed out"
             echo "check_passed=false" >> $GITHUB_OUTPUT
@@ -105,10 +105,10 @@ jobs:
           echo "  Passed: $CHECK_PASSED"
           echo "  Details: $DETAILS"
           echo "  Session: https://app.devin.ai/sessions/$SESSION_ID"
-          
+
           if [ "$CHECK_PASSED" != "true" ]; then
             echo "SCA vulnerability check failed!"
             exit 1
           fi
-          
+
           echo "SCA vulnerability check passed!"

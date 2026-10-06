@@ -44,7 +44,10 @@ jobs:
       - name: Roll App Runner and wait
         run: |
           arn="$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$APP_RUNNER_SERVICE_NAME'].ServiceArn" --output text)"
-          operation="$(aws apprunner start-deployment --service-arn "$arn" --query OperationId --output text)"
+          # The ECR push already triggers an automatic rollout (auto_deployments_enabled); if so, follow that
+          # operation instead of failing on the overlapping start-deployment call.
+          operation="$(aws apprunner start-deployment --service-arn "$arn" --query OperationId --output text 2>/dev/null \
+            || aws apprunner list-operations --service-arn "$arn" --max-results 1 --query 'OperationSummaryList[0].Id' --output text)"
           for _ in $(seq 1 60); do
             status="$(aws apprunner list-operations --service-arn "$arn" --query "OperationSummaryList[?Id=='$operation'].Status" --output text)"
             echo "deployment $operation: $status"
