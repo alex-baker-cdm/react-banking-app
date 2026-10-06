@@ -16,7 +16,7 @@ const Statements: React.FC = () => {
       .then(async (accounts) => {
         const first = accounts[0];
         setSelectedAccount(first);
-        console.log('statement account', first.accountNumber, first.availableBalance);
+        console.log('statement account', first., first.availableBalance);
         const transactions = await fetchTransactions(first.id);
         setRows(transactions);
       })
