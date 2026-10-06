@@ -36,10 +36,16 @@ function postCredit(account, amount) {
 function postDebit(account, amount) {
   const rules = POSTING_RULES[account.type];
   if (!rules.debit) {
-    throw new ValidationError(`You can't transfer money out of a ${account.type} account.`, 'fromAccountId');
+    throw new ValidationError(
+      `You can't transfer money out of a ${account.type} account.`,
+      'fromAccountId'
+    );
   }
   if (account[rules.debit] < amount) {
-    throw new ValidationError('The amount exceeds the available balance of the From account.', 'amount');
+    throw new ValidationError(
+      'The amount exceeds the available balance of the From account.',
+      'amount'
+    );
   }
   account[rules.debit] = roundMoney(account[rules.debit] - amount);
   if (rules.mirror) {

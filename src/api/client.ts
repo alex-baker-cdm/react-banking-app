@@ -22,7 +22,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
   });
   const text = await response.text();
-  const payload: unknown = text ? JSON.parse(text) : null;
+  let payload: unknown = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch {
+    payload = null;
+  }
   if (!response.ok) {
     const body =
       payload && typeof payload === 'object' && 'error' in payload

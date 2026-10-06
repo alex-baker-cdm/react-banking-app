@@ -15,14 +15,19 @@ const AccountDetail: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
     Promise.all([fetchAccount(id), fetchTransactions(id)])
       .then(([acct, txns]) => {
+        if (cancelled) return;
         setAccount(acct);
         setTransactions(txns);
       })
-      .catch((err: unknown) =>
-        setError(err instanceof Error ? err.message : 'Unable to load account.')
-      );
+      .catch((err: unknown) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Unable to load account.');
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   return (

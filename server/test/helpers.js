@@ -14,7 +14,11 @@ async function startTestServer(options) {
       body: body ? JSON.stringify(body) : undefined,
     });
     const text = await response.text();
-    return { status: response.status, body: text ? JSON.parse(text) : null, headers: response.headers };
+    return {
+      status: response.status,
+      body: text ? JSON.parse(text) : null,
+      headers: response.headers,
+    };
   }
 
   return { request, close: () => new Promise((resolve) => server.close(resolve)) };

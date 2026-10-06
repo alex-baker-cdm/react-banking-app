@@ -15,7 +15,7 @@ resource "aws_secretsmanager_secret_version" "devinApiKeyPlaceholder" {
 data "archive_file" "alertsLambda" {
   type        = "zip"
   source_file = "${path.module}/lambda/alerts.py"
-  output_path = "${path.module}/build/alerts.zip"
+  output_path = "${path.module}/alerts.zip"
 }
 
 resource "aws_iam_role" "alertsLambda" {

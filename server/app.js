@@ -18,7 +18,11 @@ function createApp({ accounts = seedAccounts(), transactions = seedTransactions(
   const transferService = createTransferService({ accounts, transactions });
 
   app.get('/health', (req, res) => {
-    res.json({ status: 'ok', service: 'wf-online-banking', uptimeSeconds: Math.round(process.uptime()) });
+    res.json({
+      status: 'ok',
+      service: 'wf-online-banking',
+      uptimeSeconds: Math.round(process.uptime()),
+    });
   });
 
   app.use('/api', accountsRouter({ accounts, transactions }));

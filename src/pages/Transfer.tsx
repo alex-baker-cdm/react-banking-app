@@ -39,7 +39,9 @@ const Transfer: React.FC = () => {
     try {
       const result = await submitTransfer(request);
       setReceipt(result);
-      loadAccounts();
+      fetchAccounts()
+        .then(setAccounts)
+        .catch(() => undefined);
     } catch (err: unknown) {
       if (err instanceof ApiError && err.status < 500) {
         setFieldError({ field: err.field, message: err.message });
