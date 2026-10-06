@@ -5,6 +5,12 @@ enum Page: Hashable {
     case accounts, transfer
 }
 
+struct TransferPrefill: Equatable {
+    let toAccountId: String
+    let amount: Double
+    let sourceLabel: String
+}
+
 @Observable
 final class BankingStore {
     var signedOn = false
@@ -12,6 +18,7 @@ final class BankingStore {
     var accounts: [Account] = []
     var loading = true
     var loadError: String?
+    var transferPrefill: TransferPrefill?
 
     private let api = ApiClient.shared
 
@@ -25,6 +32,16 @@ final class BankingStore {
             loadError = error.localizedDescription
         }
         loading = false
+    }
+
+    func payMinimumDue(for account: Account) {
+        guard let amount = account.minimumDueAmount else { return }
+        transferPrefill = TransferPrefill(
+            toAccountId: account.id,
+            amount: amount,
+            sourceLabel: "\(account.name) ...\(account.lastFour)"
+        )
+        page = .transfer
     }
 
     func transactions(for account: Account) async throws -> [Transaction] {

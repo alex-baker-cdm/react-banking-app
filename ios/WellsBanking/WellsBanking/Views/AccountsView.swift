@@ -96,6 +96,19 @@ struct AccountDetailView: View {
                     + Text("  ...\(account.lastFour)").font(.subheadline).foregroundStyle(Theme.muted))
                 (Text(Format.money(account.headlineBalance)).font(.title.weight(.semibold)).foregroundStyle(Theme.ink)
                     + Text("  \(account.headlineLabel.lowercased())").font(.subheadline).foregroundStyle(Theme.muted))
+                if let minimumDue = account.minimumDueAmount {
+                    Card {
+                        SectionHeader(title: "Quick actions")
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Minimum due \(Format.money(minimumDue))\(account.paymentDueDate.map { " by \(Format.date($0))" } ?? "")")
+                                .font(.subheadline).foregroundStyle(Theme.muted)
+                            Button("Pay minimum due") { store.payMinimumDue(for: account) }
+                                .buttonStyle(PrimaryButtonStyle())
+                                .accessibilityIdentifier("payMinimumDue")
+                        }
+                        .padding(16)
+                    }
+                }
                 if let error {
                     Banner(kind: .error, heading: "We couldn't load activity") { Text(error) }
                 }
