@@ -11,6 +11,7 @@ struct TransferView: View {
     @State private var receipt: TransferReceipt?
     @State private var failure: ApiError?
     @State private var prefillNote: String?
+    @State private var submissionId = 0
 
     private var fromOptions: [Account] { store.accounts.filter { $0.type.isDeposit } }
     private var toOptions: [Account] { store.accounts.filter { $0.id != fromAccountId } }
@@ -118,17 +119,25 @@ struct TransferView: View {
     private func submit() async {
         submitting = true
         fieldError = nil
-        defer { submitting = false }
+        submissionId += 1
+        let id = submissionId
+        defer { if id == submissionId { submitting = false } }
         do {
-            receipt = try await store.transfer(TransferRequest(fromAccountId: fromAccountId, toAccountId: toAccountId, amount: amount, memo: memo))
+            let result = try await store.transfer(TransferRequest(fromAccountId: fromAccountId, toAccountId: toAccountId, amount: amount, memo: memo))
+            guard id == submissionId else { return }
+            receipt = result
         } catch let error as ApiError {
+            guard id == submissionId else { return }
             if error.isServerError { failure = error } else { fieldError = error }
         } catch {
+            guard id == submissionId else { return }
             failure = ApiError(status: 0, code: "UNKNOWN", message: error.localizedDescription, field: nil, correlationId: nil)
         }
     }
 
     private func reset() {
+        submissionId += 1
+        submitting = false
         receipt = nil
         failure = nil
         fieldError = nil
