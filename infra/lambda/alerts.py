@@ -13,6 +13,7 @@ import gzip
 import json
 import logging
 import os
+import re
 import urllib.error
 import urllib.request
 
@@ -51,9 +52,9 @@ def handler(event, _context):
             continue
         incident["logGroup"] = logGroup
         incident["logStream"] = logStream
-        correlationId = incident.get("correlationId") or logEvent.get("id")
-        if correlationId in _openedIncidents:
-            log.info("skipping correlationId=%s: session already opened by an earlier delivery", correlationId)
+        eventId = logEvent.get("id") or f"{logStream}:{logEvent.get('timestamp')}"
+        if eventId in _openedIncidents:
+            log.info("skipping log event %s: session already opened by an earlier delivery", eventId)
             continue
         try:
             session = openSession(incident)
@@ -62,7 +63,7 @@ def handler(event, _context):
             failed.append(incident.get("correlationId"))
             continue
         if session:
-            _openedIncidents.add(correlationId)
+            _openedIncidents.add(eventId)
             opened.append({"correlationId": incident.get("correlationId"), "sessionUrl": session.get("url")})
 
     log.info("processed %d log events, opened %d Devin sessions (%d failed): %s", len(payload.get("logEvents", [])), len(opened), len(failed), json.dumps(opened))
@@ -136,7 +137,22 @@ def sessionTitle(incident: dict) -> str:
     return f"[AUTO-TRIAGE] {route} {incident.get('statusCode', 500)} - {error[:80]} (ref {ref})"
 
 
+UUID_CHARS = re.compile(r"[^0-9a-fA-F-]")
+INLINE_FIELDS = ("method", "path", "errorName", "errorMessage", "event", "logGroup", "logStream", "timestamp")
+
+
+def sanitizeIncident(incident: dict) -> dict:
+    """Header- and client-controlled fields are interpolated into prose; keep them single-line and bounded."""
+    clean = dict(incident)
+    clean["correlationId"] = UUID_CHARS.sub("", str(incident.get("correlationId", "")))[:36]
+    for field in INLINE_FIELDS:
+        if field in clean:
+            clean[field] = " ".join(str(clean[field]).split())[:300]
+    return clean
+
+
 def buildPrompt(incident: dict) -> str:
+    incident = sanitizeIncident(incident)
     correlationId = incident.get("correlationId", "")
     evidence = json.dumps({k: v for k, v in incident.items() if k not in {"stack"}}, indent=2)
     stack = incident.get("stack", "(no stack captured)")

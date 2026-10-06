@@ -1,6 +1,7 @@
 const { logger } = require('../logger');
 
-const SENSITIVE_KEY = /pass|secret|token|ssn|cvv|pin|card(number)?$/i;
+const SENSITIVE_KEY =
+  /pass|secret|token|ssn|cvv|pin|key$|card(number)?$|account(number|no)|routing|email|phone/i;
 const MAX_STRING = 200;
 
 function redact(value, depth = 0) {
