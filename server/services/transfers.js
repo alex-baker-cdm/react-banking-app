@@ -12,7 +12,9 @@ const POSTING_RULES = {
 };
 
 function postingRulesFor(account, field) {
-  const rules = Object.hasOwn(POSTING_RULES, account.type) ? POSTING_RULES[account.type] : undefined;
+  const rules = Object.hasOwn(POSTING_RULES, account.type)
+    ? POSTING_RULES[account.type]
+    : undefined;
   if (!rules) {
     throw new ValidationError(`Transfers aren't supported for ${account.type} accounts.`, field);
   }
@@ -37,7 +39,10 @@ function parseAmount(raw) {
 function assertCreditable(account) {
   const rules = postingRulesFor(account, 'toAccountId');
   if (!rules.credit) {
-    throw new ValidationError(`You can't transfer money into a ${account.type} account.`, 'toAccountId');
+    throw new ValidationError(
+      `You can't transfer money into a ${account.type} account.`,
+      'toAccountId'
+    );
   }
 }
 
@@ -56,10 +61,16 @@ function postCredit(account, amount) {
 function postDebit(account, amount) {
   const rules = postingRulesFor(account, 'fromAccountId');
   if (!rules.debit) {
-    throw new ValidationError(`You can't transfer money out of a ${account.type} account.`, 'fromAccountId');
+    throw new ValidationError(
+      `You can't transfer money out of a ${account.type} account.`,
+      'fromAccountId'
+    );
   }
   if (account[rules.debit] < amount) {
-    throw new ValidationError('The amount exceeds the available balance of the From account.', 'amount');
+    throw new ValidationError(
+      'The amount exceeds the available balance of the From account.',
+      'amount'
+    );
   }
   account[rules.debit] = roundMoney(account[rules.debit] - amount);
   if (rules.mirror) {
