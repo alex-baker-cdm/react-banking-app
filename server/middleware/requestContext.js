@@ -1,11 +1,11 @@
 const { randomUUID } = require('node:crypto');
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const { logger } = require('../logger');
 
 function requestContext(req, res, next) {
   const supplied = req.get('x-correlation-id');
-  req.correlationId = supplied && UUID.test(supplied) ? supplied : randomUUID();
+  req.correlationId = supplied && uuidPattern.test(supplied) ? supplied : randomUUID();
   res.set('x-correlation-id', req.correlationId);
   const startedAt = process.hrtime.bigint();
 
