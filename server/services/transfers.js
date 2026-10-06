@@ -7,12 +7,19 @@ const { ValidationError, NotFoundError } = require('../errors');
 const POSTING_RULES = {
   checking: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
   savings: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
-  credit: { credit: 'currentBalance', direction: -1, mirror: 'availableCredit', mirrorDirection: 1 },
+  credit: {
+    credit: 'currentBalance',
+    direction: -1,
+    mirror: 'availableCredit',
+    mirrorDirection: 1,
+  },
   loan: { credit: 'currentBalance', direction: -1 },
 };
 
 function postingRulesFor(account, field) {
-  const rules = POSTING_RULES[account.type];
+  const rules = Object.hasOwn(POSTING_RULES, account.type)
+    ? POSTING_RULES[account.type]
+    : undefined;
   if (!rules) {
     throw new ValidationError(`Transfers aren't supported for ${account.type} accounts.`, field);
   }
@@ -37,7 +44,7 @@ function parseAmount(raw) {
 function postCredit(account, rules, amount) {
   const direction = rules.direction ?? 1;
   account[rules.credit] = roundMoney(account[rules.credit] + direction * amount);
-  if (rules.mirror) {
+  if (rules.mirror && typeof account[rules.mirror] === 'number') {
     const mirrorDirection = rules.mirrorDirection ?? direction;
     account[rules.mirror] = roundMoney(account[rules.mirror] + mirrorDirection * amount);
   }
@@ -45,10 +52,16 @@ function postCredit(account, rules, amount) {
 
 function postDebit(account, rules, amount) {
   if (!rules.debit) {
-    throw new ValidationError(`You can't transfer money out of a ${account.type} account.`, 'fromAccountId');
+    throw new ValidationError(
+      `You can't transfer money out of a ${account.type} account.`,
+      'fromAccountId'
+    );
   }
   if (account[rules.debit] < amount) {
-    throw new ValidationError('The amount exceeds the available balance of the From account.', 'amount');
+    throw new ValidationError(
+      'The amount exceeds the available balance of the From account.',
+      'amount'
+    );
   }
   account[rules.debit] = roundMoney(account[rules.debit] - amount);
   if (rules.mirror) {

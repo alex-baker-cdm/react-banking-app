@@ -98,7 +98,10 @@ test('POST /api/transfers pays a credit card from checking', async () => {
     assert.equal(body.transfer.to.availableCredit, 8750.43);
 
     const history = await server.request('GET', '/api/accounts/cc-3309/transactions');
-    assert.match(history.body.transactions[0].description, /from Everyday Checking .*Minimum payment/);
+    assert.match(
+      history.body.transactions[0].description,
+      /from Everyday Checking .*Minimum payment/
+    );
     assert.equal(history.body.transactions[0].amount, 35);
   } finally {
     await server.close();
@@ -107,7 +110,14 @@ test('POST /api/transfers pays a credit card from checking', async () => {
 
 test('POST /api/transfers to an unsupported account type is rejected without debiting the From account', async () => {
   const accounts = [
-    { id: 'chk-1', type: 'checking', name: 'Checking', lastFour: '0001', availableBalance: 100, currentBalance: 100 },
+    {
+      id: 'chk-1',
+      type: 'checking',
+      name: 'Checking',
+      lastFour: '0001',
+      availableBalance: 100,
+      currentBalance: 100,
+    },
     { id: 'brk-1', type: 'brokerage', name: 'Brokerage', lastFour: '0002', currentBalance: 0 },
   ];
   const server = await startTestServer({ accounts, transactions: [] });
