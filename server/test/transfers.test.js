@@ -81,3 +81,92 @@ test('POST /api/transfers rejects same-account transfers', async () => {
     await server.close();
   }
 });
+
+// Regression for prod incident 98518a42-f004-4f50-beaf-792352cf921b: paying a credit card returned a
+// 500 after the From account had already been debited.
+test('POST /api/transfers pays a credit card (incident 98518a42-f004-4f50-beaf-792352cf921b)', async () => {
+  const server = await startTestServer();
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-4471',
+      toAccountId: 'cc-3309',
+      amount: '1',
+      memo: '',
+    });
+    assert.equal(status, 201);
+    assert.equal(body.transfer.from.availableBalance, 4825.12);
+    assert.equal(body.transfer.from.currentBalance, 4825.12);
+    assert.equal(body.transfer.to.currentBalance, 1283.57);
+    assert.equal(body.transfer.to.availableCredit, 8716.43);
+
+    const history = await server.request('GET', '/api/accounts/cc-3309/transactions');
+    assert.match(history.body.transactions[0].description, /from Everyday Checking/);
+    assert.equal(history.body.transactions[0].amount, 1);
+  } finally {
+    await server.close();
+  }
+});
+
+test('POST /api/transfers rejects unsupported account types without moving money', async () => {
+  const accounts = [
+    {
+      id: 'chk-1',
+      type: 'checking',
+      name: 'Checking',
+      lastFour: '0001',
+      availableBalance: 100,
+      currentBalance: 100,
+    },
+    { id: 'inv-1', type: 'brokerage', name: 'Brokerage', lastFour: '0002', currentBalance: 0 },
+  ];
+  const server = await startTestServer({ accounts, transactions: [] });
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-1',
+      toAccountId: 'inv-1',
+      amount: 25,
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'ValidationError');
+    assert.equal(body.error.field, 'toAccountId');
+
+    const from = await server.request('GET', '/api/accounts/chk-1');
+    assert.equal(from.body.account.availableBalance, 100);
+    assert.equal(from.body.account.currentBalance, 100);
+    const history = await server.request('GET', '/api/accounts/chk-1/transactions');
+    assert.equal(history.body.transactions.length, 0);
+  } finally {
+    await server.close();
+  }
+});
+
+test('POST /api/transfers rejects a card missing availableCredit without moving money', async () => {
+  const accounts = [
+    {
+      id: 'chk-1',
+      type: 'checking',
+      name: 'Checking',
+      lastFour: '0001',
+      availableBalance: 100,
+      currentBalance: 100,
+    },
+    { id: 'cc-1', type: 'credit', name: 'Card', lastFour: '0002', currentBalance: 50 },
+  ];
+  const server = await startTestServer({ accounts, transactions: [] });
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-1',
+      toAccountId: 'cc-1',
+      amount: 25,
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.field, 'toAccountId');
+
+    const card = await server.request('GET', '/api/accounts/cc-1');
+    assert.equal(card.body.account.currentBalance, 50);
+    const from = await server.request('GET', '/api/accounts/chk-1');
+    assert.equal(from.body.account.availableBalance, 100);
+  } finally {
+    await server.close();
+  }
+});
