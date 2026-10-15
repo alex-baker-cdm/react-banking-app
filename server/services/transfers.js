@@ -2,10 +2,17 @@ const { randomUUID } = require('node:crypto');
 const { ValidationError, NotFoundError } = require('../errors');
 
 // How a transfer posts to each account type. Deposit accounts move availableBalance/currentBalance;
-// loans track the outstanding principal, so a payment reduces currentBalance.
+// loans track the outstanding principal, so a payment reduces currentBalance; credit cards also free up
+// the same amount of availableCredit.
 const POSTING_RULES = {
   checking: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
   savings: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
+  credit: {
+    credit: 'currentBalance',
+    direction: -1,
+    mirror: 'availableCredit',
+    mirrorDirection: 1,
+  },
   loan: { credit: 'currentBalance', direction: -1 },
 };
 
@@ -24,17 +31,24 @@ function parseAmount(raw) {
   return amount;
 }
 
-function postCredit(account, amount) {
+function postingRulesFor(account, field) {
   const rules = POSTING_RULES[account.type];
+  if (!rules) {
+    throw new ValidationError(`Transfers aren't supported for ${account.type} accounts.`, field);
+  }
+  return rules;
+}
+
+function postCredit(account, rules, amount) {
   const direction = rules.direction ?? 1;
+  const mirrorDirection = rules.mirrorDirection ?? direction;
   account[rules.credit] = roundMoney(account[rules.credit] + direction * amount);
   if (rules.mirror) {
-    account[rules.mirror] = roundMoney(account[rules.mirror] + direction * amount);
+    account[rules.mirror] = roundMoney(account[rules.mirror] + mirrorDirection * amount);
   }
 }
 
-function postDebit(account, amount) {
-  const rules = POSTING_RULES[account.type];
+function postDebit(account, rules, amount) {
   if (!rules.debit) {
     throw new ValidationError(
       `You can't transfer money out of a ${account.type} account.`,
@@ -71,9 +85,12 @@ function createTransferService({ accounts, transactions }) {
     const amount = parseAmount(rawAmount);
     const from = findAccount(fromAccountId, 'fromAccountId');
     const to = findAccount(toAccountId, 'toAccountId');
+    // Resolve both sides before posting so a rejected transfer never leaves a one-sided debit.
+    const fromRules = postingRulesFor(from, 'fromAccountId');
+    const toRules = postingRulesFor(to, 'toAccountId');
 
-    postDebit(from, amount);
-    postCredit(to, amount);
+    postDebit(from, fromRules, amount);
+    postCredit(to, toRules, amount);
 
     const postedAt = new Date().toISOString().slice(0, 10);
     const confirmationNumber = randomUUID().replace(/-/g, '').slice(0, 10).toUpperCase();
