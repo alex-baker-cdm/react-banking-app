@@ -88,6 +88,27 @@ class BankingStore(private val api: ApiClient = ApiClient.shared) : ViewModel() 
         return receipt
     }
 
+    /** Runs in viewModelScope so leaving the Transfer tab mid-flight cannot cancel a posted transfer. */
+    fun submitTransfer() {
+        val form = transfer
+        if (form.submitting) return
+        form.submitting = true
+        form.fieldError = null
+        viewModelScope.launch {
+            try {
+                form.receipt = transfer(
+                    TransferRequest(form.fromAccountId, form.toAccountId, form.amount.trim(), form.memo),
+                )
+            } catch (e: ApiError) {
+                if (e.isServerError) form.failure = e else form.fieldError = e
+            } catch (e: Exception) {
+                form.failure = ApiError(0, "UNKNOWN", e.message ?: "Something went wrong.", null, null)
+            } finally {
+                form.submitting = false
+            }
+        }
+    }
+
     fun signOff() {
         signedOn = false
         page = Page.ACCOUNTS

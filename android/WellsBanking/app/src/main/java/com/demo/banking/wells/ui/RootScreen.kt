@@ -53,7 +53,7 @@ fun RootScreen(store: BankingStore) {
         return
     }
 
-    LaunchedEffect(Unit) { store.refreshNow() }
+    LaunchedEffect(store.page) { if (store.page == Page.ACCOUNTS) store.refreshNow() }
     val accountsNav = rememberNavController()
 
     Scaffold(

@@ -21,7 +21,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -31,42 +30,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.demo.banking.wells.Account
-import com.demo.banking.wells.ApiError
 import com.demo.banking.wells.BankingStore
 import com.demo.banking.wells.Format
-import com.demo.banking.wells.TransferRequest
 import com.demo.banking.wells.WfColors
-import kotlinx.coroutines.launch
 
 @Composable
 fun TransferScreen(store: BankingStore) {
     val form = store.transfer
     val fromOptions = store.accounts.filter { it.type.isDeposit }
     val toOptions = store.accounts.filter { it.id != form.fromAccountId }
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(fromOptions.map { it.id }) {
         if (form.fromAccountId.isEmpty() || fromOptions.none { it.id == form.fromAccountId }) {
             form.fromAccountId = fromOptions.firstOrNull { it.id != form.toAccountId }?.id ?: ""
-        }
-    }
-
-    fun submit() {
-        if (form.submitting) return
-        form.submitting = true
-        form.fieldError = null
-        scope.launch {
-            try {
-                form.receipt = store.transfer(
-                    TransferRequest(form.fromAccountId, form.toAccountId, form.amount.trim(), form.memo),
-                )
-            } catch (e: ApiError) {
-                if (e.isServerError) form.failure = e else form.fieldError = e
-            } catch (e: Exception) {
-                form.failure = ApiError(0, "UNKNOWN", e.message ?: "Something went wrong.", null, null)
-            } finally {
-                form.submitting = false
-            }
         }
     }
 
@@ -146,7 +122,7 @@ fun TransferScreen(store: BankingStore) {
                     PrimaryButton(
                         text = if (form.submitting) "Submitting…" else "Transfer",
                         enabled = !form.submitting,
-                        onClick = { submit() },
+                        onClick = { store.submitTransfer() },
                     )
                 }
             }

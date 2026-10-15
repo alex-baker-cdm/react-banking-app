@@ -30,7 +30,7 @@ The base URL is compiled into `BuildConfig.API_BASE_URL`, resolved in this order
 2. Gradle property `BANKING_API_BASE_URL` (`gradle.properties`, or `-PBANKING_API_BASE_URL=...`)
 3. default `http://10.0.2.2:8080` (the emulator's alias for the host, where `npm run serve` listens)
 
-Rebuild after changing it. Cleartext HTTP is allowed (`usesCleartextTraffic`) so the local default works.
+Rebuild after changing it. Cleartext HTTP is only permitted for `10.0.2.2`/`localhost` (`res/xml/network_security_config.xml`) so the local default works; any other host must be HTTPS.
 
 ## Emulator (headless Linux)
 
