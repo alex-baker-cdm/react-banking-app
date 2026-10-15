@@ -81,3 +81,71 @@ test('POST /api/transfers rejects same-account transfers', async () => {
     await server.close();
   }
 });
+
+// Regression for prod incident 79868bb0-1932-4a80-a5a9-ec0682482043: paying a credit card from checking
+// threw "Cannot read properties of undefined (reading 'direction')" after the checking account was debited.
+test('POST /api/transfers pays a credit card (incident 79868bb0-1932-4a80-a5a9-ec0682482043)', async () => {
+  const server = await startTestServer();
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-4471',
+      toAccountId: 'cc-3309',
+      amount: '1',
+      memo: '',
+    });
+    assert.equal(status, 201);
+    assert.equal(body.transfer.from.availableBalance, 4825.12);
+    assert.equal(body.transfer.from.currentBalance, 4825.12);
+    assert.equal(body.transfer.to.currentBalance, 1283.57);
+    assert.equal(body.transfer.to.availableCredit, 8716.43);
+
+    const history = await server.request('GET', '/api/accounts/cc-3309/transactions');
+    assert.match(history.body.transactions[0].description, /from Everyday Checking/);
+  } finally {
+    await server.close();
+  }
+});
+
+test('POST /api/transfers rejects a credit card as the From account', async () => {
+  const server = await startTestServer();
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'cc-3309',
+      toAccountId: 'chk-4471',
+      amount: 10,
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.field, 'fromAccountId');
+  } finally {
+    await server.close();
+  }
+});
+
+test('POST /api/transfers rejects an unsupported To account without debiting the From account', async () => {
+  const accounts = [
+    {
+      id: 'chk-1',
+      type: 'checking',
+      name: 'Checking',
+      lastFour: '0001',
+      availableBalance: 100,
+      currentBalance: 100,
+    },
+    { id: 'brk-1', type: 'brokerage', name: 'Brokerage', lastFour: '0002', currentBalance: 0 },
+  ];
+  const server = await startTestServer({ accounts, transactions: [] });
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-1',
+      toAccountId: 'brk-1',
+      amount: 25,
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, 'ValidationError');
+    assert.equal(body.error.field, 'toAccountId');
+    assert.equal(accounts[0].availableBalance, 100);
+    assert.equal(accounts[0].currentBalance, 100);
+  } finally {
+    await server.close();
+  }
+});
