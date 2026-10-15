@@ -96,12 +96,15 @@ class BankingStore(private val api: ApiClient = ApiClient.shared) : ViewModel() 
         form.fieldError = null
         viewModelScope.launch {
             try {
-                form.receipt = transfer(
+                val receipt = transfer(
                     TransferRequest(form.fromAccountId, form.toAccountId, form.amount.trim(), form.memo),
                 )
+                if (signedOn) form.receipt = receipt
             } catch (e: ApiError) {
+                if (!signedOn) return@launch
                 if (e.isServerError) form.failure = e else form.fieldError = e
             } catch (e: Exception) {
+                if (!signedOn) return@launch
                 form.failure = ApiError(0, "UNKNOWN", e.message ?: "Something went wrong.", null, null)
             } finally {
                 form.submitting = false
