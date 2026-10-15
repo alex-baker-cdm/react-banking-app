@@ -2,10 +2,17 @@ const { randomUUID } = require('node:crypto');
 const { ValidationError, NotFoundError } = require('../errors');
 
 // How a transfer posts to each account type. Deposit accounts move availableBalance/currentBalance;
-// loans track the outstanding principal, so a payment reduces currentBalance.
+// loans track the outstanding principal, so a payment reduces currentBalance. Credit cards also
+// reduce the balance owed and free up the same amount of availableCredit.
 const POSTING_RULES = {
   checking: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
   savings: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
+  credit: {
+    credit: 'currentBalance',
+    direction: -1,
+    mirror: 'availableCredit',
+    mirrorDirection: 1,
+  },
   loan: { credit: 'currentBalance', direction: -1 },
 };
 
@@ -24,17 +31,26 @@ function parseAmount(raw) {
   return amount;
 }
 
-function postCredit(account, amount) {
-  const rules = POSTING_RULES[account.type];
+function postingRulesFor(account, field) {
+  const rules = Object.hasOwn(POSTING_RULES, account.type)
+    ? POSTING_RULES[account.type]
+    : undefined;
+  if (!rules) {
+    throw new ValidationError(`Transfers aren't supported for ${account.type} accounts.`, field);
+  }
+  return rules;
+}
+
+function postCredit(account, rules, amount) {
   const direction = rules.direction ?? 1;
+  const mirrorDirection = rules.mirrorDirection ?? direction;
   account[rules.credit] = roundMoney(account[rules.credit] + direction * amount);
-  if (rules.mirror) {
-    account[rules.mirror] = roundMoney(account[rules.mirror] + direction * amount);
+  if (rules.mirror && typeof account[rules.mirror] === 'number') {
+    account[rules.mirror] = roundMoney(account[rules.mirror] + mirrorDirection * amount);
   }
 }
 
-function postDebit(account, amount) {
-  const rules = POSTING_RULES[account.type];
+function assertCanDebit(account, rules, amount) {
   if (!rules.debit) {
     throw new ValidationError(
       `You can't transfer money out of a ${account.type} account.`,
@@ -47,6 +63,9 @@ function postDebit(account, amount) {
       'amount'
     );
   }
+}
+
+function postDebit(account, rules, amount) {
   account[rules.debit] = roundMoney(account[rules.debit] - amount);
   if (rules.mirror) {
     account[rules.mirror] = roundMoney(account[rules.mirror] - amount);
@@ -72,8 +91,13 @@ function createTransferService({ accounts, transactions }) {
     const from = findAccount(fromAccountId, 'fromAccountId');
     const to = findAccount(toAccountId, 'toAccountId');
 
-    postDebit(from, amount);
-    postCredit(to, amount);
+    // Validate both sides before mutating either account so a rejected transfer never half-posts.
+    const fromRules = postingRulesFor(from, 'fromAccountId');
+    const toRules = postingRulesFor(to, 'toAccountId');
+    assertCanDebit(from, fromRules, amount);
+
+    postDebit(from, fromRules, amount);
+    postCredit(to, toRules, amount);
 
     const postedAt = new Date().toISOString().slice(0, 10);
     const confirmationNumber = randomUUID().replace(/-/g, '').slice(0, 10).toUpperCase();
