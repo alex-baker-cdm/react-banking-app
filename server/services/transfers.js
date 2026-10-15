@@ -35,8 +35,12 @@ function postingRulesFor(account, field) {
   const rules = Object.hasOwn(POSTING_RULES, account.type)
     ? POSTING_RULES[account.type]
     : undefined;
-  if (!rules) {
-    throw new ValidationError(`Transfers aren't supported for ${account.type} accounts.`, field);
+  const postedFields = rules ? [rules.debit, rules.credit, rules.mirror].filter(Boolean) : [];
+  if (!rules || !postedFields.every((name) => Number.isFinite(account[name]))) {
+    throw new ValidationError(
+      `Transfers aren't supported for this ${account.type} account.`,
+      field
+    );
   }
   return rules;
 }
@@ -45,7 +49,7 @@ function postCredit(account, rules, amount) {
   const direction = rules.direction ?? 1;
   const mirrorDirection = rules.mirrorDirection ?? direction;
   account[rules.credit] = roundMoney(account[rules.credit] + direction * amount);
-  if (rules.mirror && typeof account[rules.mirror] === 'number') {
+  if (rules.mirror) {
     account[rules.mirror] = roundMoney(account[rules.mirror] + mirrorDirection * amount);
   }
 }

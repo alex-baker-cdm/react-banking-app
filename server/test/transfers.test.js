@@ -139,3 +139,34 @@ test('POST /api/transfers rejects unsupported account types without moving money
     await server.close();
   }
 });
+
+test('POST /api/transfers rejects a card missing availableCredit without moving money', async () => {
+  const accounts = [
+    {
+      id: 'chk-1',
+      type: 'checking',
+      name: 'Checking',
+      lastFour: '0001',
+      availableBalance: 100,
+      currentBalance: 100,
+    },
+    { id: 'cc-1', type: 'credit', name: 'Card', lastFour: '0002', currentBalance: 50 },
+  ];
+  const server = await startTestServer({ accounts, transactions: [] });
+  try {
+    const { status, body } = await server.request('POST', '/api/transfers', {
+      fromAccountId: 'chk-1',
+      toAccountId: 'cc-1',
+      amount: 25,
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.field, 'toAccountId');
+
+    const card = await server.request('GET', '/api/accounts/cc-1');
+    assert.equal(card.body.account.currentBalance, 50);
+    const from = await server.request('GET', '/api/accounts/chk-1');
+    assert.equal(from.body.account.availableBalance, 100);
+  } finally {
+    await server.close();
+  }
+});
