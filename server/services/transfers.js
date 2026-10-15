@@ -6,6 +6,12 @@ const { ValidationError, NotFoundError } = require('../errors');
 const POSTING_RULES = {
   checking: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
   savings: { debit: 'availableBalance', credit: 'availableBalance', mirror: 'currentBalance' },
+  credit: {
+    credit: 'currentBalance',
+    direction: -1,
+    mirror: 'availableCredit',
+    mirrorDirection: 1,
+  },
   loan: { credit: 'currentBalance', direction: -1 },
 };
 
@@ -24,17 +30,12 @@ function parseAmount(raw) {
   return amount;
 }
 
-function postCredit(account, amount) {
-  const rules = POSTING_RULES[account.type];
-  const direction = rules.direction ?? 1;
-  account[rules.credit] = roundMoney(account[rules.credit] + direction * amount);
-  if (rules.mirror) {
-    account[rules.mirror] = roundMoney(account[rules.mirror] + direction * amount);
-  }
+function rulesFor(account) {
+  return POSTING_RULES[account.type] ?? {};
 }
 
-function postDebit(account, amount) {
-  const rules = POSTING_RULES[account.type];
+function assertCanDebit(account, amount) {
+  const rules = rulesFor(account);
   if (!rules.debit) {
     throw new ValidationError(
       `You can't transfer money out of a ${account.type} account.`,
@@ -47,6 +48,29 @@ function postDebit(account, amount) {
       'amount'
     );
   }
+}
+
+function assertCanCredit(account) {
+  if (!rulesFor(account).credit) {
+    throw new ValidationError(
+      `You can't transfer money into a ${account.type} account.`,
+      'toAccountId'
+    );
+  }
+}
+
+function postCredit(account, amount) {
+  const rules = rulesFor(account);
+  const direction = rules.direction ?? 1;
+  const mirrorDirection = rules.mirrorDirection ?? direction;
+  account[rules.credit] = roundMoney(account[rules.credit] + direction * amount);
+  if (rules.mirror && account[rules.mirror] !== undefined) {
+    account[rules.mirror] = roundMoney(account[rules.mirror] + mirrorDirection * amount);
+  }
+}
+
+function postDebit(account, amount) {
+  const rules = rulesFor(account);
   account[rules.debit] = roundMoney(account[rules.debit] - amount);
   if (rules.mirror) {
     account[rules.mirror] = roundMoney(account[rules.mirror] - amount);
@@ -72,6 +96,9 @@ function createTransferService({ accounts, transactions }) {
     const from = findAccount(fromAccountId, 'fromAccountId');
     const to = findAccount(toAccountId, 'toAccountId');
 
+    // Validate both legs before posting either so a rejected transfer never leaves a one-sided debit.
+    assertCanDebit(from, amount);
+    assertCanCredit(to);
     postDebit(from, amount);
     postCredit(to, amount);
 
