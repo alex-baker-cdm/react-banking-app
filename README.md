@@ -39,6 +39,7 @@ npx react-scripts test --watchAll=false   # React component tests (Jest + Testin
 - `infra/` - Terraform for ECR, App Runner, the alerts Lambda (`infra/lambda/alerts.py` holds the triage prompt)
   and the GitHub OIDC deploy role. `scripts/deploy.sh` builds, pushes and applies.
 - `ios/` - SwiftUI companion app (iOS) that talks to the same API.
+- `android/` - Jetpack Compose companion app (Android) with the same screens; see `android/WellsBanking/README.md`.
 - `REVIEW.md` - code review guidelines enforced by Devin Review.
 
 ## Observability
