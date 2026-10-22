@@ -1,0 +1,16 @@
+<section class="wf-panel wf-panel-success" role="status" aria-live="polite">
+  <h2>Transfer complete</h2>
+  <p>
+    {{ formatMoney(receipt().amount) }} moved from {{ receipt().from.name }} ...{{
+      receipt().from.lastFour
+    }}
+    to {{ receipt().to.name }} ...{{ receipt().to.lastFour }} on
+    {{ formatDate(receipt().postedAt) }}.
+  </p>
+  <p class="wf-confirmation">
+    Confirmation number <strong>{{ receipt().confirmationNumber }}</strong>
+  </p>
+  <button type="button" class="button wf-button-secondary" (click)="restart.emit()">
+    Make another transfer
+  </button>
+</section>

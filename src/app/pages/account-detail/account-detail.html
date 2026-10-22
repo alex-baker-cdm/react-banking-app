@@ -1,0 +1,48 @@
+<app-layout>
+  <p class="wf-breadcrumb">
+    <a routerLink="/accounts">Account Summary</a> / {{ account()?.name ?? 'Account' }}
+  </p>
+  @if (error(); as message) {
+    <p class="wf-panel wf-panel-error" role="alert">{{ message }}</p>
+  }
+  @if (account(); as acct) {
+    <div class="wf-page-title">
+      <h1>
+        {{ acct.name }} <span class="wf-account-number">...{{ acct.lastFour }}</span>
+      </h1>
+      <p class="wf-detail-balance">
+        {{ formatMoney(acct.availableBalance ?? acct.currentBalance) }}
+        <span class="wf-muted">{{ balanceLabel() }}</span>
+      </p>
+    </div>
+    <section class="wf-section" aria-labelledby="activity-title">
+      <div class="wf-section-head">
+        <h2 id="activity-title">Activity</h2>
+      </div>
+      <table class="wf-table">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Description</th>
+            <th scope="col" class="right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (txn of transactions(); track txn.id) {
+            <tr>
+              <td>{{ formatDate(txn.postedAt) }}</td>
+              <td>{{ txn.description }}</td>
+              <td
+                class="right"
+                [class.wf-debit]="txn.amount < 0"
+                [class.wf-credit]="txn.amount >= 0"
+              >
+                {{ formatMoney(txn.amount) }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+</app-layout>

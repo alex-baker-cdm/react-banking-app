@@ -1,0 +1,30 @@
+<app-layout>
+  <div class="wf-page-title">
+    <h1>Transfer &amp; Pay</h1>
+    <p class="wf-muted">Move money between your accounts or make a payment.</p>
+  </div>
+
+  @if (receipt(); as result) {
+    <app-transfer-success [receipt]="result" (restart)="reset()" />
+  }
+  @if (failure(); as failed) {
+    <app-transfer-failure
+      [message]="failed.message"
+      [correlationId]="failed.correlationId"
+      (retry)="reset()"
+    />
+  }
+  @if (!receipt() && !failure() && accounts(); as accountList) {
+    <section class="wf-panel">
+      <app-transfer-form
+        [accounts]="accountList"
+        [submitting]="submitting()"
+        [fieldError]="fieldError()"
+        (submitted)="handleSubmit($event)"
+      />
+    </section>
+  }
+  @if (!accounts() && !failure()) {
+    <p class="wf-muted">Loading your accounts…</p>
+  }
+</app-layout>

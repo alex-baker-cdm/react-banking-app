@@ -1,0 +1,10 @@
+<section class="wf-panel wf-panel-error" role="alert">
+  <h2>We couldn't complete your transfer</h2>
+  <p>{{ message() }}</p>
+  @if (correlationId(); as id) {
+    <p class="wf-confirmation">
+      Reference ID <strong>{{ id }}</strong>
+    </p>
+  }
+  <button type="button" class="button wf-button-secondary" (click)="retry.emit()">Try again</button>
+</section>

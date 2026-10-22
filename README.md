@@ -1,11 +1,11 @@
 # Online Banking demo (Wells Fargo-style)
 
 Retail online-banking web app used for Devin demos: account summary, account activity and a
-Transfer & Pay flow. React (Create React App, strict TypeScript) UI served by a small Express API,
+Transfer & Pay flow. Angular (standalone components, signals, strict TypeScript) UI served by a small Express API,
 deployed to AWS App Runner with a CloudWatch -> Lambda -> Devin auto-triage pipeline.
 
 ```
-browser -> App Runner (Express + React) --stderr JSON--> CloudWatch Logs --filter ERROR--> Lambda --> Devin session
+browser -> App Runner (Express + Angular) --stderr JSON--> CloudWatch Logs --filter ERROR--> Lambda --> Devin session
                                                                                               |-> clones repo
                                                                                               |-> pulls logs
                                                                                               |-> reproduces the failure locally on camera
@@ -20,7 +20,8 @@ npm ci --legacy-peer-deps
 npm run build && npm run serve   # Express API + built UI on http://localhost:8080
 ```
 
-For UI hot reload run `npm run serve` in one terminal and `npm start` in another (CRA proxies `/api` to 8080).
+For UI hot reload run `npm run serve` in one terminal and `npm start` in another (`ng serve` on http://localhost:3000
+proxies `/api` to 8080 via `proxy.conf.json`). Needs Node 20.19+ or 22.12+.
 
 ## Checks
 
@@ -28,12 +29,14 @@ For UI hot reload run `npm run serve` in one terminal and `npm start` in another
 npm run eslint
 npm run typecheck
 npm run test:server                       # Express API tests (node:test)
-npx react-scripts test --watchAll=false   # React component tests (Jest + Testing Library)
+npm test -- --no-watch                    # Angular component tests (vitest + TestBed, jsdom)
 ```
 
 ## Layout
 
-- `src/` - React UI. Pages in `src/pages/`, shared components in `src/components/<Name>/`, API client in `src/api/`.
+- `src/` - Angular UI. Pages in `src/app/pages/`, shared components in `src/app/components/<name>/`, API client in
+  `src/app/api/`, cross-cutting services (error handler, screen-load monitor) in `src/app/services/`. The built app
+  lands in `build/` and is served by Express.
 - `server/` - Express API: `routes/`, `services/transfers.js` (posting rules), `data/accounts.js` (seed data),
   `middleware/` (correlation IDs, structured error logging). Tests in `server/test/`.
 - `infra/` - Terraform for ECR, App Runner, the alerts Lambda (`infra/lambda/alerts.py` holds the triage prompt)

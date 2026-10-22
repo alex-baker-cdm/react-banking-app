@@ -1,0 +1,80 @@
+<form class="wf-form" (ngSubmit)="handleSubmit()" novalidate>
+  <div class="form-line">
+    <label for="fromAccountId">From</label>
+    <select
+      id="fromAccountId"
+      name="fromAccountId"
+      class="input"
+      [ngModel]="fromAccountId()"
+      (ngModelChange)="onFromChange($event)"
+    >
+      @for (account of fromOptions(); track account.id) {
+        <option [value]="account.id">{{ describe(account) }}</option>
+      }
+    </select>
+    @if (errorFor('fromAccountId'); as message) {
+      <span class="input-error-message">{{ message }}</span>
+    }
+  </div>
+
+  <div class="form-line">
+    <label for="toAccountId">To</label>
+    <select
+      id="toAccountId"
+      name="toAccountId"
+      class="input"
+      [class.input-error]="errorFor('toAccountId')"
+      [ngModel]="toAccountId()"
+      (ngModelChange)="toAccountId.set($event)"
+    >
+      <option value="">Select an account</option>
+      @for (account of toOptions(); track account.id) {
+        <option [value]="account.id">{{ describe(account) }}</option>
+      }
+    </select>
+    @if (errorFor('toAccountId'); as message) {
+      <span class="input-error-message">{{ message }}</span>
+    }
+  </div>
+
+  <div class="form-line">
+    <label for="amount">Amount</label>
+    <div class="wf-amount">
+      <span aria-hidden="true">$</span>
+      <input
+        id="amount"
+        name="amount"
+        type="text"
+        inputmode="decimal"
+        placeholder="0.00"
+        class="input"
+        [class.input-error]="errorFor('amount')"
+        [ngModel]="amount()"
+        (ngModelChange)="amount.set($event)"
+      />
+    </div>
+    @if (errorFor('amount'); as message) {
+      <span class="input-error-message">{{ message }}</span>
+    }
+  </div>
+
+  <div class="form-line">
+    <label for="memo">Memo (optional)</label>
+    <input
+      id="memo"
+      name="memo"
+      type="text"
+      maxlength="40"
+      placeholder="e.g. October payment"
+      class="input"
+      [ngModel]="memo()"
+      (ngModelChange)="memo.set($event)"
+    />
+  </div>
+
+  <div class="form-line flex flex-v-center">
+    <button type="submit" class="button wf-button-primary" [disabled]="submitting()">
+      {{ submitting() ? 'Submitting…' : 'Transfer' }}
+    </button>
+  </div>
+</form>

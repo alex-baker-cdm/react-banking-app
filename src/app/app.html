@@ -1,0 +1,11 @@
+@if (errorState.error(); as error) {
+  <div role="alert" class="wf-error-fallback">
+    <h2>Something went wrong</h2>
+    <p>{{ errorMessage(error) }}</p>
+    <button type="button" class="button wf-button-secondary" (click)="errorState.reset()">
+      Try again
+    </button>
+  </div>
+} @else {
+  <router-outlet />
+}
