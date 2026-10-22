@@ -12,7 +12,7 @@ function seedAccounts() {
     {
       id: 'sav-8820',
       type: 'savings',
-      name: 'Way2Save Savings',
+      name: 'Everyday Savings',
       lastFour: '8820',
       availableBalance: 12450.0,
       currentBalance: 12450.0,
@@ -21,7 +21,7 @@ function seedAccounts() {
     {
       id: 'cc-3309',
       type: 'credit',
-      name: 'Active Cash Visa Signature Card',
+      name: 'Cash Rewards Credit Card',
       lastFour: '3309',
       currentBalance: 1284.57,
       creditLimit: 10000,
@@ -61,7 +61,7 @@ function seedTransactions() {
       id: 'txn-1003',
       accountId: 'chk-4471',
       postedAt: '2026-10-03',
-      description: 'Online Transfer to Way2Save Savings',
+      description: 'Online Transfer to Everyday Savings',
       amount: -500.0,
     },
     {
