@@ -2,7 +2,7 @@
 
 Devin Review enforces this document on every pull request. Each rule has an ID; review comments cite the ID so authors can trace a finding back to the standard. Rules marked **[blocking]** must be fixed before merge; others are advisory.
 
-Scope: the React web app (`src/`), the Express API (`server/`), the iOS app (`ios/`), infrastructure (`infra/`), and CI (`.github/`).
+Scope: the Angular web app (`src/`), the Express API (`server/`), the iOS app (`ios/`), infrastructure (`infra/`), and CI (`.github/`).
 
 ---
 
@@ -37,34 +37,34 @@ Scope: the React web app (`src/`), the Express API (`server/`), the iOS app (`io
 ## 4. TypeScript & Data Contracts (TS)
 
 - **TS-01 [blocking]** `any` is prohibited. Use the shared types in `src/api/types.ts` (`Account`, `Transaction`, …) or `unknown` narrowed by a type guard.
-- **TS-02 [blocking]** API responses are parsed through `src/api/client.ts`; pages never call `fetch` directly or build API URLs by hand.
-- **TS-03** Identifiers: `camelCase` for variables, functions, props, hooks; `PascalCase` for components, interfaces, types; `UPPER_SNAKE_CASE` only for true compile-time constants.
+- **TS-02 [blocking]** API responses go through the `ApiClient` service in `src/app/api/client.ts`; components never inject `HttpClient` or call `fetch` directly or build API URLs by hand.
+- **TS-03** Identifiers: `camelCase` for variables, functions, inputs, outputs, signals; `PascalCase` for components, services, interfaces, types; `UPPER_SNAKE_CASE` only for true compile-time constants.
 - **TS-04** `strict` stays on; no `@ts-ignore` / `@ts-expect-error` without a justification comment.
 
-## 5. React & UI Consistency (UI)
+## 5. Angular & UI Consistency (UI)
 
-- **UI-01 [blocking]** Lists use a stable domain key (`transaction.id`), never the array index.
-- **UI-02 [blocking]** Components are named arrow functions typed `React.FC<Props>` with an explicit props interface; no inline prop object types.
+- **UI-01 [blocking]** `@for` blocks track by a stable domain key (`track transaction.id`), never `$index`.
+- **UI-02 [blocking]** Components are standalone with signal-based `input()` / `output()` APIs and typed inputs; no NgModules, no `@Input()` decorators, no `any` inputs.
 - **UI-03** Reuse the design-system primitives and classes in `public/app.css` (`wf-page-title`, `wf-panel`, `wf-button`, `wf-table`, …). Do not introduce one-off inline styles or new CSS-in-JS.
-- **UI-04** Static assets referenced from JSX must exist under `public/`; images use `alt` text or `aria-hidden="true"` when decorative.
-- **UI-05** Pages (`src/pages/`) compose components and hold minimal logic; data shaping belongs in `src/api/` or hooks in `src/hooks/`.
-- **UI-06** Follow the Rules of Hooks; custom hooks live in `src/hooks/` and start with `use`.
+- **UI-04** Static assets referenced from templates must exist under `public/`; images use `alt` text or `aria-hidden="true"` when decorative.
+- **UI-05** Pages (`src/app/pages/`) compose components and hold minimal logic; data shaping belongs in `src/app/api/` or services in `src/app/services/`.
+- **UI-06** Subscriptions are scoped to the component (`takeUntilDestroyed`) or replaced by signals; templates use the built-in control flow (`@if`, `@for`) and keep logic in the class.
 
 ## 6. Accessibility (A11Y)
 
-- **A11Y-01 [blocking]** Interactive elements are native (`<button>`, `<a>`, `<input>`) or carry `role`, `tabIndex`, and keyboard handlers.
+- **A11Y-01 [blocking]** Interactive elements are native (`<button>`, `<a>`, `<input>`) or carry `role`, `tabindex`, and keyboard handlers.
 - **A11Y-02** Form controls have associated labels; tables have header cells; colour is never the only signal.
 
 ## 7. Quality & Test Engineering (TEST)
 
 - **TEST-01 [blocking]** New server behaviour ships with `node:test` coverage in `server/test/` for the success path and each error path.
-- **TEST-02 [blocking]** New pages/components ship with a React Testing Library test covering default, loading, error, and empty states; query by role/label/text.
+- **TEST-02 [blocking]** New pages/components ship with a TestBed spec (`*.spec.ts`, vitest) covering default, loading, error, and empty states; query by role/label/text, not by CSS class.
 - **TEST-03** Tests are never skipped, deleted, or weakened to make CI pass; a regression fix adds a test that fails before and passes after.
 - **TEST-04** Regression tests for production incidents reference the incident `correlationId` in the test name or a comment.
 
 ## 8. Delivery & CI/CD (CI)
 
-- **CI-01 [blocking]** PRs pass `npm run eslint`, `npx prettier --check .`, `npm run typecheck`, `npm run test:server`, the React test suite, and `npm run build`.
+- **CI-01 [blocking]** PRs pass `npm run eslint`, `npx prettier --check .`, `npm run typecheck`, `npm run test:server`, `npm test`, and `npm run build`.
 - **CI-02** One concern per PR. The description states the user-facing change, the risk, and the verification evidence (test output, screenshots, or recording).
 - **CI-03** Infrastructure and workflow changes (`infra/`, `.github/`) are reviewed for least privilege; IAM policies name resources, not `*`, unless the API requires it.
 - **CI-04** Generated artifacts (`build/`, `__pycache__/`, `*.zip`) are never committed.

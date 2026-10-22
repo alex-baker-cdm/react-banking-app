@@ -1,0 +1,22 @@
+<header class="wf-header">
+  <div class="wf-topbar">
+    <div class="container flex flex-v-center flex-space-between">
+      <a routerLink="/accounts" class="wf-wordmark no-select" aria-label="Demo Bank home">
+        DEMO BANK
+      </a>
+      <nav class="wf-topnav flex flex-v-center" aria-label="Account navigation">
+        <span class="wf-greeting">Good morning, Alex</span>
+        <a routerLink="/" class="wf-signoff">Sign off</a>
+      </nav>
+    </div>
+  </div>
+  <div class="wf-stripe" aria-hidden="true"></div>
+  <nav class="wf-subnav" aria-label="Primary">
+    <div class="container flex flex-v-center">
+      <a routerLink="/accounts" routerLinkActive="active">Accounts</a>
+      <a routerLink="/transfer" routerLinkActive="active">Transfer &amp; Pay</a>
+      <a href="#plan" (click)="$event.preventDefault()">Plan &amp; Learn</a>
+      <a href="#security" (click)="$event.preventDefault()">Security &amp; Support</a>
+    </div>
+  </nav>
+</header>

@@ -1,0 +1,36 @@
+<app-layout>
+  <div class="wf-page-title flex flex-v-center flex-space-between">
+    <h1>Account Summary</h1>
+    <button type="button" class="button wf-button-primary" (click)="openTransfer()">
+      Transfer money
+    </button>
+  </div>
+
+  @if (error(); as message) {
+    <p class="wf-panel wf-panel-error" role="alert">{{ message }}</p>
+  }
+  @if (!accounts() && !error()) {
+    <p class="wf-muted">Loading your accounts…</p>
+  }
+
+  @if (accounts()) {
+    <section class="wf-section" aria-labelledby="deposit-title">
+      <div class="wf-section-head flex flex-v-center flex-space-between">
+        <h2 id="deposit-title">Cash accounts</h2>
+        <span class="wf-section-total">{{ cashTotal() }} available</span>
+      </div>
+      @for (account of deposits(); track account.id) {
+        <button app-account-card [account]="account" (selected)="openAccount($event)"></button>
+      }
+    </section>
+
+    <section class="wf-section" aria-labelledby="credit-title">
+      <div class="wf-section-head flex flex-v-center flex-space-between">
+        <h2 id="credit-title">Credit cards &amp; loans</h2>
+      </div>
+      @for (account of credit(); track account.id) {
+        <button app-account-card [account]="account" (selected)="openAccount($event)"></button>
+      }
+    </section>
+  }
+</app-layout>

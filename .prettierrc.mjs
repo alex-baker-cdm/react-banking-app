@@ -3,7 +3,7 @@ const config = {
   endOfLine: 'auto',
   singleQuote: true,
   trailingComma: 'es5',
-  jsxSingleQuote: true,
+  overrides: [{ files: '*.html', options: { parser: 'angular' } }],
 };
 
 export default config;

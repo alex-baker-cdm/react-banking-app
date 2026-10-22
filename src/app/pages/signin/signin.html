@@ -1,0 +1,54 @@
+<div class="wf-page wf-signon-page">
+  <header class="wf-header">
+    <div class="wf-topbar">
+      <div class="container flex flex-v-center flex-space-between">
+        <span class="wf-wordmark no-select">DEMO BANK</span>
+        <span class="wf-greeting">Online Banking</span>
+      </div>
+    </div>
+    <div class="wf-stripe" aria-hidden="true"></div>
+  </header>
+
+  <main class="container wf-main flex flex-h-center">
+    <section class="wf-signon" aria-labelledby="signon-title">
+      <h1 id="signon-title">Sign On</h1>
+      <p class="wf-muted">Demo environment - any username and password will sign you on.</p>
+      <form class="wf-form" (ngSubmit)="handleSubmit()" novalidate>
+        <div class="form-line">
+          <label for="username">Username</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            class="input"
+            autocomplete="username"
+            [ngModel]="username()"
+            (ngModelChange)="setUsername($event)"
+          />
+        </div>
+        <div class="form-line">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            class="input"
+            autocomplete="current-password"
+            [ngModel]="password()"
+            (ngModelChange)="setPassword($event)"
+          />
+        </div>
+        @if (error(); as message) {
+          <p class="input-error-message" role="alert">{{ message }}</p>
+        }
+        <div class="form-line">
+          <button type="submit" class="button wf-button-primary">Sign On</button>
+        </div>
+      </form>
+      <div class="wf-signon-links">
+        <a href="#forgot" (click)="$event.preventDefault()">Forgot username or password?</a>
+        <a href="#enroll" (click)="$event.preventDefault()">Enroll now</a>
+      </div>
+    </section>
+  </main>
+</div>
