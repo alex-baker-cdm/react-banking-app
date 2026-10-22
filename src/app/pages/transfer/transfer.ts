@@ -62,7 +62,11 @@ export class Transfer implements OnInit {
           const correlationId = err instanceof ApiError ? err.correlationId : undefined;
           Sentry.captureException(err, {
             tags: { screen: 'Transfer' },
-            extra: { correlationId, request },
+            extra: {
+              correlationId,
+              fromAccountId: request.fromAccountId,
+              toAccountId: request.toAccountId,
+            },
           });
           this.failure.set({
             message: err instanceof Error ? err.message : 'Something went wrong.',
