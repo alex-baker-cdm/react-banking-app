@@ -2,7 +2,7 @@
 
 Jetpack Compose companion to the Market Intelligence web app (S&P Global-style demo), with feature parity to
 `ios/WellsBanking`. Same API: sign in, Watchlists (index strip + watchlist sections), company profile with rating
-actions, and Alerts (create rating-change / price alerts, list and remove them). Directory, package and identifier
+actions, add/remove companies on a watchlist, and Alerts (create rating-change / price alerts, list and remove them). Directory, package and identifier
 names keep their original `WellsBanking` naming; only what the user sees changed.
 
 Stack: Kotlin 2.0.21, AGP 8.7.3, Gradle 8.13 (wrapper committed), Compose BOM 2024.12.01 / Material 3,
@@ -17,6 +17,8 @@ export ANDROID_HOME=$HOME/android-sdk      # or wherever the SDK lives; also wri
 ./run.sh                                   # assembleDebug, adb install -r, launch on the running emulator/device
 BANKING_API_BASE_URL=https://<app-runner-host> ./run.sh   # point at the hosted API
 ```
+
+Unit tests (JVM, JUnit 4): `./gradlew testDebugUnitTest`
 
 Build only:
 

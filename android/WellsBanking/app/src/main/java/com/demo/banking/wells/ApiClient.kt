@@ -52,6 +52,17 @@ class ApiClient(val baseUrl: String = BuildConfig.API_BASE_URL) {
     suspend fun watchlists(): List<Watchlist> =
         send(get("/api/watchlists"), WatchlistsResponse.serializer()).watchlists
 
+    suspend fun addWatchlistCompany(watchlistId: String, companyId: String): Watchlist {
+        val body = json.encodeToString(WatchlistCompanyRequest.serializer(), WatchlistCompanyRequest(companyId))
+        val request = builder("/api/watchlists/$watchlistId/companies").post(body.toRequestBody(jsonType)).build()
+        return send(request, WatchlistResponse.serializer()).watchlist
+    }
+
+    suspend fun removeWatchlistCompany(watchlistId: String, companyId: String): Watchlist {
+        val request = builder("/api/watchlists/$watchlistId/companies/$companyId").delete().build()
+        return send(request, WatchlistResponse.serializer()).watchlist
+    }
+
     suspend fun ratingActions(companyId: String): List<RatingAction> =
         send(get("/api/companies/$companyId/rating-actions"), RatingActionsResponse.serializer()).ratingActions
 

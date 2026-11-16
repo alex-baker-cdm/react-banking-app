@@ -50,6 +50,11 @@ class BankingStore(private val api: ApiClient = ApiClient.shared) : ViewModel() 
     var loading by mutableStateOf(true)
     var loadError by mutableStateOf<ApiError?>(null)
 
+    /** Result of the last add/remove on a watchlist, shown and announced on the Watchlists screen. */
+    var watchlistStatus by mutableStateOf<String?>(null)
+    var watchlistError by mutableStateOf<ApiError?>(null)
+    var watchlistBusy by mutableStateOf(false)
+
     val alerts = mutableStateListOf<Alert>()
     var alertsLoaded by mutableStateOf(false)
     var alertsError by mutableStateOf<ApiError?>(null)
@@ -77,6 +82,40 @@ class BankingStore(private val api: ApiClient = ApiClient.shared) : ViewModel() 
     fun company(id: String?): Company? =
         companies.firstOrNull { it.id == id }
             ?: watchlists.firstNotNullOfOrNull { list -> list.companies.firstOrNull { it.id == id } }
+
+    fun addCompany(watchlist: Watchlist, company: Company) {
+        updateWatchlist(watchlist, watchlist.addedMessage(company)) { api.addWatchlistCompany(watchlist.id, company.id) }
+    }
+
+    fun removeCompany(watchlist: Watchlist, company: Company) {
+        updateWatchlist(watchlist, watchlist.removedMessage(company)) { api.removeWatchlistCompany(watchlist.id, company.id) }
+    }
+
+    /** On failure the list is left as it was and the error is shown instead of the status message. */
+    private fun updateWatchlist(watchlist: Watchlist, successMessage: String, call: suspend () -> Watchlist) {
+        if (watchlistBusy) return
+        watchlistBusy = true
+        watchlistStatus = null
+        watchlistError = null
+        viewModelScope.launch {
+            try {
+                val updated = call()
+                if (!signedOn) return@launch
+                val index = watchlists.indexOfFirst { it.id == watchlist.id }
+                if (index >= 0) watchlists[index] = updated
+                watchlistStatus = successMessage
+            } catch (e: Exception) {
+                if (signedOn) watchlistError = e.asApiError()
+            } finally {
+                watchlistBusy = false
+            }
+        }
+    }
+
+    fun dismissWatchlistMessage() {
+        watchlistStatus = null
+        watchlistError = null
+    }
 
     suspend fun ratingActions(company: Company): List<RatingAction> = api.ratingActions(company.id)
 
@@ -149,6 +188,7 @@ class BankingStore(private val api: ApiClient = ApiClient.shared) : ViewModel() 
         signedOn = false
         page = Page.WATCHLISTS
         loading = true
+        dismissWatchlistMessage()
         alertsLoaded = false
         alerts.clear()
         alertForm.reset()
