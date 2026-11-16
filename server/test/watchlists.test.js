@@ -69,3 +69,18 @@ test('DELETE /api/watchlists/:id/companies/:companyId removes the company', asyn
     await server.close();
   }
 });
+
+test('DELETE /api/watchlists/:id/companies/:companyId returns 404 for an unknown watchlist', async () => {
+  const server = await startTestServer();
+  try {
+    const { status, body } = await server.request(
+      'DELETE',
+      '/api/watchlists/wl-missing/companies/f'
+    );
+    assert.equal(status, 404);
+    assert.equal(body.error.code, 'NOT_FOUND');
+    assert.ok(body.error.correlationId);
+  } finally {
+    await server.close();
+  }
+});
