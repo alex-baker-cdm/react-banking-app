@@ -22,7 +22,7 @@ targets:
     info:
       path: WellsBanking/Info.plist
       properties:
-        CFBundleDisplayName: Banking
+        CFBundleDisplayName: Market Intelligence
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ApiBaseUrl: http://localhost:8080

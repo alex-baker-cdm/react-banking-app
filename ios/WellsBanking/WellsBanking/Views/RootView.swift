@@ -9,14 +9,14 @@ struct RootView: View {
             SignOnView()
         } else {
             VStack(spacing: 0) {
-                AppHeader { store.signedOn = false }
+                AppHeader { store.signOff() }
                 TabView(selection: $store.page) {
-                    NavigationStack { AccountsView() }
-                        .tabItem { Label("Accounts", systemImage: "building.columns") }
-                        .tag(Page.accounts)
-                    NavigationStack { TransferView() }
-                        .tabItem { Label("Transfer & Pay", systemImage: "arrow.left.arrow.right") }
-                        .tag(Page.transfer)
+                    NavigationStack { WatchlistsView() }
+                        .tabItem { Label("tab_bar.watchlists".localized, systemImage: "list.bullet.rectangle") }
+                        .tag(Page.watchlists)
+                    NavigationStack { AlertsView() }
+                        .tabItem { Label("tab_bar.alerts".localized, systemImage: "bell") }
+                        .tag(Page.alerts)
                 }
             }
             .background(Theme.surface.ignoresSafeArea())
@@ -33,32 +33,31 @@ struct SignOnView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            AppHeader()
+            AppHeader(showsProduct: false)
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Sign On").font(.largeTitle.weight(.semibold)).foregroundStyle(Theme.ink)
-                    Text("Demo environment - any username and password will sign you on.")
-                        .font(.subheadline).foregroundStyle(Theme.muted)
+                    Text("sign_in.title".localized).font(.largeTitle.weight(.semibold)).foregroundStyle(Theme.ink)
+                        .accessibilityAddTraits(.isHeader)
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Username").font(.subheadline.weight(.semibold))
+                        Text("sign_in.username".localized).font(.subheadline.weight(.semibold))
                         TextField("", text: $username)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .textFieldStyle(.roundedBorder)
-                            .accessibilityLabel("Username")
+                            .accessibilityLabel("sign_in.username".localized)
                     }
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Password").font(.subheadline.weight(.semibold))
+                        Text("sign_in.password".localized).font(.subheadline.weight(.semibold))
                         SecureField("", text: $password)
                             .textFieldStyle(.roundedBorder)
-                            .accessibilityLabel("Password")
+                            .accessibilityLabel("sign_in.password".localized)
                     }
                     if let error {
-                        Text(error).font(.subheadline.weight(.medium)).foregroundStyle(Theme.red)
+                        Text(error).font(.subheadline.weight(.medium)).foregroundStyle(Theme.negative)
                     }
-                    Button("Sign On") {
+                    Button("sign_in.submit_button".localized) {
                         guard !username.trimmingCharacters(in: .whitespaces).isEmpty, !password.isEmpty else {
-                            error = "Enter your username and password."
+                            error = "sign_in.missing_credentials".localizedString
                             return
                         }
                         error = nil
@@ -69,11 +68,11 @@ struct SignOnView: View {
                 }
                 .padding(24)
                 .background(Color.white)
-                .overlay(alignment: .top) { Rectangle().fill(Theme.red).frame(height: 6) }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.line))
                 .padding(20)
                 .padding(.top, 24)
+                Footer()
             }
             .background(Theme.surface)
         }

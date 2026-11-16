@@ -1,0 +1,69 @@
+"header.wordmark" = "S&P Global";
+"header.product" = "Market Intelligence";
+"header.sign_off" = "Sign off";
+"footer.disclaimer" = "Demo environment with illustrative data. Not affiliated with S&P Global Inc.";
+
+"common.retry" = "Retry";
+"common.done" = "Done";
+"common.reference_id" = "Reference ID: %@";
+"common.network_error" = "Network error. Please try again.";
+"common.unexpected_response" = "Unexpected response from the server.";
+"common.request_failed" = "Request failed with status %d";
+"common.rating.accessibility" = "Rating %@";
+"common.change.up" = "▲ +%@%%";
+"common.change.down" = "▼ -%@%%";
+"common.change.up.accessibility" = "up %@ percent";
+"common.change.down.accessibility" = "down %@ percent";
+
+"sign_in.title" = "Market Intelligence";
+"sign_in.username" = "Username";
+"sign_in.password" = "Password";
+"sign_in.submit_button" = "Sign in";
+"sign_in.missing_credentials" = "Enter your username and password.";
+
+"tab_bar.watchlists" = "Watchlists";
+"tab_bar.alerts" = "Alerts";
+
+"watchlists.title" = "Watchlists";
+"watchlists.load_error.title" = "We couldn't load your watchlists";
+"watchlists.indices.accessibility" = "Indices";
+
+"company.ticker_sector" = "%@ · %@";
+"company.rating" = "Issuer credit rating";
+"company.outlook" = "Outlook";
+"company.price" = "Price";
+"company.market_cap" = "Market cap";
+"company.market_cap.value" = "$%@B";
+"company.create_alert_button" = "Create alert";
+"company.rating_actions.title" = "Rating actions";
+"company.rating_actions.empty" = "No rating actions.";
+"company.rating_actions.load_error.title" = "We couldn't load rating actions";
+"company.rating_actions.change" = "%@ → %@";
+"company.rating_actions.change.accessibility" = "%@ to %@";
+
+"alerts.title" = "Alerts";
+"alerts.form.company" = "Company";
+"alerts.form.company.placeholder" = "Select a company";
+"alerts.form.company.option" = "%@ - %@";
+"alerts.form.type" = "Alert type";
+"alerts.form.type.rating" = "Rating change";
+"alerts.form.type.price" = "Price";
+"alerts.form.direction" = "Direction";
+"alerts.form.direction.above" = "Rises above";
+"alerts.form.direction.below" = "Falls below";
+"alerts.form.price" = "Price";
+"alerts.form.note" = "Note (optional)";
+"alerts.form.submit_button" = "Create alert";
+"alerts.form.submitting" = "Creating…";
+"alerts.created.title" = "Alert created";
+"alerts.create_error.title" = "We couldn't create your alert";
+"alerts.create_error.message" = "Something went wrong on our side. Please try again.";
+"alerts.summary.rating" = "Rating change alert for %@";
+"alerts.summary.price.above" = "Price alert for %@ when it rises above %@";
+"alerts.summary.price.below" = "Price alert for %@ when it falls below %@";
+"alerts.list.title" = "Your alerts";
+"alerts.list.empty" = "You have no alerts.";
+"alerts.list.created_on" = "Created %@";
+"alerts.list.remove_button" = "Remove";
+"alerts.list.remove_button.accessibility" = "Remove %@";
+"alerts.list.remove_error.message" = "We couldn't remove that alert. Please try again.";
