@@ -1,6 +1,6 @@
 {
-  "short_name": "Online Banking",
-  "name": "Online Banking Demo",
+  "short_name": "Market Intelligence",
+  "name": "Market Intelligence Demo",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#d71e28",
+  "theme_color": "#d6002a",
   "background_color": "#ffffff"
 }

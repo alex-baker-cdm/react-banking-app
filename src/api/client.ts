@@ -1,4 +1,12 @@
-import { Account, ApiErrorBody, Transaction, TransferReceipt, TransferRequest } from './types';
+import {
+  Alert,
+  AlertRequest,
+  ApiErrorBody,
+  Company,
+  MarketIndex,
+  RatingAction,
+  Watchlist,
+} from './types';
 
 export class ApiError extends Error {
   status: number;
@@ -43,25 +51,46 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return payload as T;
 }
 
-export async function fetchAccounts(): Promise<Account[]> {
-  const data = await request<{ accounts: Account[] }>('/api/accounts');
-  return data.accounts;
+export async function fetchIndices(): Promise<MarketIndex[]> {
+  const data = await request<{ indices: MarketIndex[] }>('/api/indices');
+  return data.indices;
 }
 
-export async function fetchAccount(id: string): Promise<Account> {
-  const data = await request<{ account: Account }>(`/api/accounts/${id}`);
-  return data.account;
+export async function fetchWatchlists(): Promise<Watchlist[]> {
+  const data = await request<{ watchlists: Watchlist[] }>('/api/watchlists');
+  return data.watchlists;
 }
 
-export async function fetchTransactions(id: string): Promise<Transaction[]> {
-  const data = await request<{ transactions: Transaction[] }>(`/api/accounts/${id}/transactions`);
-  return data.transactions;
+export async function fetchCompanies(): Promise<Company[]> {
+  const data = await request<{ companies: Company[] }>('/api/companies');
+  return data.companies;
 }
 
-export async function submitTransfer(body: TransferRequest): Promise<TransferReceipt> {
-  const data = await request<{ transfer: TransferReceipt }>('/api/transfers', {
+export async function fetchCompany(id: string): Promise<Company> {
+  const data = await request<{ company: Company }>(`/api/companies/${id}`);
+  return data.company;
+}
+
+export async function fetchRatingActions(id: string): Promise<RatingAction[]> {
+  const data = await request<{ ratingActions: RatingAction[] }>(
+    `/api/companies/${id}/rating-actions`
+  );
+  return data.ratingActions;
+}
+
+export async function fetchAlerts(): Promise<Alert[]> {
+  const data = await request<{ alerts: Alert[] }>('/api/alerts');
+  return data.alerts;
+}
+
+export async function createAlert(body: AlertRequest): Promise<Alert> {
+  const data = await request<{ alert: Alert }>('/api/alerts', {
     method: 'POST',
     body: JSON.stringify(body),
   });
-  return data.transfer;
+  return data.alert;
+}
+
+export async function removeAlert(id: string): Promise<void> {
+  await request<null>(`/api/alerts/${id}`, { method: 'DELETE' });
 }

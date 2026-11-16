@@ -14,29 +14,29 @@ const Signin: React.FC = () => {
     if (!username.trim() || !password) {
       const message = 'Enter your username and password.';
       setError(message);
-      Sentry.captureMessage(`Sign-on validation error: ${message}`, { level: 'warning' });
+      Sentry.captureMessage(`Sign-in validation error: ${message}`, { level: 'warning' });
       return;
     }
-    navigate('/accounts', { replace: true });
+    navigate('/watchlists', { replace: true });
   };
 
   return (
-    <div className='wf-page wf-signon-page'>
-      <header className='wf-header'>
-        <div className='wf-topbar'>
+    <div className='sp-page sp-signon-page'>
+      <header className='sp-header'>
+        <div className='sp-topbar'>
           <div className='container flex flex-v-center flex-space-between'>
-            <span className='wf-wordmark no-select'>WELLS FARGO</span>
-            <span className='wf-greeting'>Online Banking</span>
+            <span className='sp-wordmark no-select'>S&amp;P Global</span>
+            <span className='sp-greeting'>Market Intelligence</span>
           </div>
         </div>
-        <div className='wf-stripe' aria-hidden='true' />
+        <div className='sp-stripe' aria-hidden='true' />
       </header>
 
-      <main className='container wf-main flex flex-h-center'>
-        <section className='wf-signon' aria-labelledby='signon-title'>
-          <h1 id='signon-title'>Sign On</h1>
-          <p className='wf-muted'>Demo environment - any username and password will sign you on.</p>
-          <form className='wf-form' onSubmit={handleSubmit} noValidate>
+      <main className='container sp-main flex flex-h-center'>
+        <section className='sp-signon' aria-labelledby='signon-title'>
+          <h1 id='signon-title'>Sign in</h1>
+          <p className='sp-muted'>Demo environment - any username and password will sign you in.</p>
+          <form className='sp-form' onSubmit={handleSubmit} noValidate>
             <div className='form-line'>
               <label htmlFor='username'>Username</label>
               <input
@@ -73,21 +73,23 @@ const Signin: React.FC = () => {
               </p>
             )}
             <div className='form-line'>
-              <button type='submit' className='button wf-button-primary'>
-                Sign On
+              <button type='submit' className='button sp-button-primary'>
+                Sign in
               </button>
             </div>
           </form>
-          <div className='wf-signon-links'>
+          <div className='sp-signon-links'>
             <a href='#forgot' onClick={(event) => event.preventDefault()}>
               Forgot username or password?
-            </a>
-            <a href='#enroll' onClick={(event) => event.preventDefault()}>
-              Enroll now
             </a>
           </div>
         </section>
       </main>
+      <footer className='sp-footer'>
+        <div className='container'>
+          <p>Demo environment with illustrative data. Not affiliated with S&amp;P Global Inc.</p>
+        </div>
+      </footer>
     </div>
   );
 };
