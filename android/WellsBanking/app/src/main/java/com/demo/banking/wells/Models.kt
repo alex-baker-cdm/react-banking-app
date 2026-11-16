@@ -1,88 +1,103 @@
 package com.demo.banking.wells
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class AccountType {
-    @SerialName("checking") CHECKING,
-    @SerialName("savings") SAVINGS,
-    @SerialName("credit") CREDIT,
-    @SerialName("loan") LOAN;
-
-    val label: String
-        get() = when (this) {
-            CHECKING -> "Checking"
-            SAVINGS -> "Savings"
-            CREDIT -> "Credit card"
-            LOAN -> "Mortgage"
-        }
-
-    val isDeposit: Boolean get() = this == CHECKING || this == SAVINGS
-}
-
-@Serializable
-data class Account(
+data class MarketIndex(
     val id: String,
-    val type: AccountType,
     val name: String,
-    val lastFour: String,
-    val currentBalance: Double,
-    val availableBalance: Double? = null,
-    val availableCredit: Double? = null,
-    val creditLimit: Double? = null,
-    val minimumPaymentDue: Double? = null,
-    val nextPaymentAmount: Double? = null,
-    val paymentDueDate: String? = null,
-    val apy: Double? = null,
+    val value: Double,
+    val change: Double = 0.0,
+    val changePct: Double = 0.0,
+)
+
+@Serializable
+data class Company(
+    val id: String,
+    val ticker: String,
+    val name: String,
+    val sector: String = "",
+    val rating: String = "",
+    val outlook: String = "",
+    val price: Double = 0.0,
+    val change: Double = 0.0,
+    val changePct: Double = 0.0,
+    val marketCapBn: Double = 0.0,
 ) {
-    val headlineBalance: Double
-        get() = if (type.isDeposit) availableBalance ?: currentBalance else currentBalance
-
-    val headlineLabel: String
-        get() = when (type) {
-            AccountType.CHECKING, AccountType.SAVINGS -> "Available balance"
-            AccountType.CREDIT -> "Current balance"
-            AccountType.LOAN -> "Principal balance"
-        }
-
-    /** Amount offered by the "Pay minimum due" quick action, or null when the account has nothing due. */
-    val paymentDue: Double?
-        get() = when (type) {
-            AccountType.CREDIT -> minimumPaymentDue
-            AccountType.LOAN -> nextPaymentAmount
-            else -> null
-        }?.takeIf { it > 0 }
+    val pickerLabel: String get() = "$ticker - $name"
 }
 
 @Serializable
-data class Transaction(
+data class Watchlist(
     val id: String,
-    val accountId: String,
-    val postedAt: String,
-    val description: String,
-    val amount: Double,
-)
+    val name: String,
+    val companies: List<Company> = emptyList(),
+) {
+    val countLabel: String get() = Format.companyCount(companies.size)
+}
 
 @Serializable
-data class TransferRequest(
-    val fromAccountId: String,
-    val toAccountId: String,
-    val amount: String,
-    val memo: String,
-)
+data class RatingAction(
+    val id: String,
+    val companyId: String,
+    val date: String,
+    val action: String,
+    val fromRating: String? = null,
+    val toRating: String? = null,
+    val outlook: String? = null,
+    val summary: String = "",
+) {
+    /** "A- → A" when the rating moved, otherwise just the rating. */
+    val ratingLabel: String
+        get() {
+            val to = toRating ?: fromRating ?: ""
+            return if (fromRating != null && fromRating != to) "$fromRating → $to" else to
+        }
+}
+
+enum class AlertType(val wire: String, val label: String) {
+    RATING("rating", "Rating change"),
+    PRICE("price", "Price"),
+}
+
+enum class AlertDirection(val wire: String, val label: String, val phrase: String) {
+    ABOVE("above", "Rises above", "rises above"),
+    BELOW("below", "Falls below", "falls below"),
+}
 
 @Serializable
-data class TransferReceipt(
-    val confirmationNumber: String,
-    val postedAt: String,
-    val amount: Double,
-    val memo: String? = null,
-    val from: Account,
-    val to: Account,
+data class Alert(
+    val id: String,
+    val companyId: String,
+    val type: String,
+    val direction: String? = null,
+    val threshold: Double? = null,
+    val note: String = "",
+    val createdAt: String = "",
+    val company: Company? = null,
+) {
+    /** One line, e.g. "Rating change alert for Apple Inc." or "Price alert for Tesla, Inc. when it falls below $400.50". */
+    val description: String
+        get() {
+            val name = company?.name ?: companyId.uppercase()
+            if (type != AlertType.PRICE.wire) return "Rating change alert for $name"
+            val phrase = AlertDirection.entries.firstOrNull { it.wire == direction }?.phrase ?: "reaches"
+            return "Price alert for $name when it $phrase ${Format.money(threshold ?: 0.0)}"
+        }
+}
+
+@Serializable
+data class AlertRequest(
+    val companyId: String,
+    val type: String,
+    val direction: String? = null,
+    val threshold: String? = null,
+    val note: String = "",
 )
 
-@Serializable data class AccountsResponse(val accounts: List<Account>)
-@Serializable data class AccountResponse(val account: Account)
-@Serializable data class TransactionsResponse(val transactions: List<Transaction>)
-@Serializable data class TransferResponse(val transfer: TransferReceipt)
+@Serializable data class IndicesResponse(val indices: List<MarketIndex>)
+@Serializable data class CompaniesResponse(val companies: List<Company>)
+@Serializable data class WatchlistsResponse(val watchlists: List<Watchlist>)
+@Serializable data class RatingActionsResponse(val ratingActions: List<RatingAction>)
+@Serializable data class AlertsResponse(val alerts: List<Alert>)
+@Serializable data class AlertResponse(val alert: Alert)

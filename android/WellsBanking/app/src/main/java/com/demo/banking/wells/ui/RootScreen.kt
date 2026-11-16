@@ -14,8 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -53,8 +54,10 @@ fun RootScreen(store: BankingStore) {
         return
     }
 
-    LaunchedEffect(store.page) { if (store.page == Page.ACCOUNTS) store.refresh() }
-    val accountsNav = rememberNavController()
+    LaunchedEffect(store.page) {
+        if (store.page == Page.WATCHLISTS) store.refresh() else store.refreshAlerts()
+    }
+    val watchlistsNav = rememberNavController()
 
     Scaffold(
         containerColor = WfColors.surface,
@@ -69,17 +72,17 @@ fun RootScreen(store: BankingStore) {
                     unselectedTextColor = WfColors.muted,
                 )
                 NavigationBarItem(
-                    selected = store.page == Page.ACCOUNTS,
-                    onClick = { store.page = Page.ACCOUNTS },
-                    icon = { Icon(Icons.Filled.AccountBalance, contentDescription = null) },
-                    label = { Text("Accounts") },
+                    selected = store.page == Page.WATCHLISTS,
+                    onClick = { store.page = Page.WATCHLISTS },
+                    icon = { Icon(Icons.Filled.Star, contentDescription = null) },
+                    label = { Text("Watchlists") },
                     colors = colors,
                 )
                 NavigationBarItem(
-                    selected = store.page == Page.TRANSFER,
-                    onClick = { store.page = Page.TRANSFER },
-                    icon = { Icon(Icons.Filled.SwapHoriz, contentDescription = null) },
-                    label = { Text("Transfer & Pay") },
+                    selected = store.page == Page.ALERTS,
+                    onClick = { store.page = Page.ALERTS },
+                    icon = { Icon(Icons.Filled.Notifications, contentDescription = null) },
+                    label = { Text("Alerts") },
                     colors = colors,
                 )
             }
@@ -87,8 +90,8 @@ fun RootScreen(store: BankingStore) {
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (store.page) {
-                Page.ACCOUNTS -> AccountsNavHost(store, accountsNav)
-                Page.TRANSFER -> TransferScreen(store)
+                Page.WATCHLISTS -> WatchlistsNavHost(store, watchlistsNav)
+                Page.ALERTS -> AlertsScreen(store)
             }
         }
     }
@@ -118,11 +121,12 @@ fun SignOnScreen(onSignedOn: () -> Unit) {
             ) {
                 Box(Modifier.fillMaxWidth().height(6.dp).background(WfColors.red))
                 Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("Sign On", fontSize = 32.sp, fontWeight = FontWeight.SemiBold, color = WfColors.ink)
                     Text(
-                        "Demo environment - any username and password will sign you on.",
-                        fontSize = 15.sp,
-                        color = WfColors.muted,
+                        "Market Intelligence",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = WfColors.ink,
+                        modifier = Modifier.semantics { heading() },
                     )
                     LabeledField("Username") {
                         OutlinedTextField(
@@ -145,9 +149,9 @@ fun SignOnScreen(onSignedOn: () -> Unit) {
                             modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Password" },
                         )
                     }
-                    error?.let { Text(it, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = WfColors.red) }
+                    error?.let { Text(it, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = WfColors.negative) }
                     PrimaryButton(
-                        text = "Sign On",
+                        text = "Sign in",
                         modifier = Modifier.padding(top = 8.dp),
                         onClick = {
                             if (username.isBlank() || password.isEmpty()) {
@@ -160,6 +164,7 @@ fun SignOnScreen(onSignedOn: () -> Unit) {
                     )
                 }
             }
+            Footer()
         }
     }
 }
@@ -170,7 +175,7 @@ fun LabeledField(label: String, error: String? = null, content: @Composable () -
         Text(label, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = WfColors.ink)
         content()
         if (error != null) {
-            Text(error, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = WfColors.red)
+            Text(error, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = WfColors.negative)
         }
     }
 }
