@@ -17,6 +17,8 @@ final class BankingStore {
     var loadError: ApiError?
     /// Company handed from the company profile to the Alerts form.
     var alertCompanyId: String?
+    var watchlistStatus: String?
+    var watchlistError: ApiError?
 
     private let api = ApiClient.shared
 
@@ -38,6 +40,8 @@ final class BankingStore {
 
     func signOff() {
         signedOn = false
+        watchlistStatus = nil
+        watchlistError = nil
         page = .watchlists
         alertCompanyId = nil
         loading = true
@@ -56,6 +60,40 @@ final class BankingStore {
     func removeAlert(_ alert: MarketAlert) async throws {
         try await api.deleteAlert(id: alert.id)
         alerts.removeAll { $0.id == alert.id }
+    }
+
+    func companiesAvailable(for watchlist: Watchlist) -> [Company] {
+        let present = Set(watchlist.companies.map(\.id))
+        return companies.filter { !present.contains($0.id) }
+    }
+
+    func addCompany(_ company: Company, to watchlist: Watchlist) async {
+        await updateWatchlist(statusKey: "watchlists.status.added", company: company, watchlist: watchlist) {
+            try await self.api.addCompany(company.id, toWatchlist: watchlist.id)
+        }
+    }
+
+    func removeCompany(_ company: Company, from watchlist: Watchlist) async {
+        await updateWatchlist(statusKey: "watchlists.status.removed", company: company, watchlist: watchlist) {
+            try await self.api.removeCompany(company.id, fromWatchlist: watchlist.id)
+        }
+    }
+
+    /// The list only changes once the server has answered with the updated watchlist.
+    private func updateWatchlist(statusKey: String, company: Company, watchlist: Watchlist, _ call: () async throws -> Watchlist) async {
+        watchlistStatus = nil
+        watchlistError = nil
+        do {
+            let updated = try await call()
+            if let index = watchlists.firstIndex(where: { $0.id == updated.id }) {
+                watchlists[index] = updated
+            }
+            watchlistStatus = statusKey.localizedFormat(company.name, watchlist.name)
+        } catch let error as ApiError {
+            watchlistError = error
+        } catch {
+            watchlistError = .network
+        }
     }
 
     func startAlert(for company: Company) {
