@@ -5,9 +5,11 @@ import { Company } from '../../api/types';
 interface IProps {
   company: Company;
   onSelect?: (company: Company) => void;
+  removeLabel?: string;
+  onRemove?: (company: Company) => void;
 }
 
-const CompanyRow: React.FC<IProps> = ({ company, onSelect }) => (
+const CompanyRow: React.FC<IProps> = ({ company, onSelect, removeLabel, onRemove }) => (
   <li className='sp-company-row'>
     <button
       type='button'
@@ -24,6 +26,16 @@ const CompanyRow: React.FC<IProps> = ({ company, onSelect }) => (
         {formatChange(company.changePct)}
       </span>
     </button>
+    {onRemove && (
+      <button
+        type='button'
+        className='sp-row-remove'
+        aria-label={removeLabel ?? `Remove ${company.name}`}
+        onClick={() => onRemove(company)}
+      >
+        <span aria-hidden='true'>×</span>
+      </button>
+    )}
   </li>
 );
 

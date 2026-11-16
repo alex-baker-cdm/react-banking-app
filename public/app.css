@@ -651,3 +651,117 @@ button:hover {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* watchlist management */
+.sp-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sp-button-secondary {
+  min-height: 44px;
+  padding: 0 18px;
+  background: var(--sp-white);
+  border: 1px solid var(--sp-ink);
+  border-radius: 22px;
+  color: var(--sp-ink);
+  font-weight: 600;
+}
+
+.sp-button-secondary:hover {
+  background: var(--sp-bg);
+}
+
+.sp-row-remove {
+  width: 44px;
+  height: 44px;
+  margin-right: 8px;
+  background: none;
+  border: none;
+  border-radius: 22px;
+  color: var(--sp-muted);
+  font-size: 1.5em;
+  line-height: 1;
+}
+
+.sp-row-remove:hover {
+  background: var(--sp-bg);
+  color: var(--sp-negative);
+}
+
+.sp-status {
+  margin-bottom: 16px;
+}
+
+.sp-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 80px 16px 16px;
+  background: rgba(18, 18, 18, 0.55);
+}
+
+.sp-dialog {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  background: var(--sp-white);
+  border-top: 4px solid var(--sp-red);
+  border-radius: 6px;
+  padding: 24px;
+}
+
+.sp-dialog h2 {
+  margin-bottom: 16px;
+  color: var(--sp-ink);
+}
+
+.sp-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.sp-picker-list {
+  margin-top: 12px;
+  overflow-y: auto;
+  border: 1px solid var(--sp-line);
+  border-radius: 6px;
+}
+
+.sp-picker-option {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: var(--sp-white);
+  border: none;
+  border-bottom: 1px solid var(--sp-line);
+  text-align: left;
+  color: var(--sp-text);
+}
+
+.sp-picker-list li:last-child .sp-picker-option {
+  border-bottom: none;
+}
+
+.sp-picker-option:hover {
+  background: #faf2f3;
+}
+
+.sp-picker-option .sp-ticker {
+  min-width: 52px;
+}
+
+.sp-picker-option .sp-rating {
+  margin-left: auto;
+}
