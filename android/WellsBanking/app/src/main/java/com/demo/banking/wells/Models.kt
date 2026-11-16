@@ -34,6 +34,19 @@ data class Watchlist(
     val companies: List<Company> = emptyList(),
 ) {
     val countLabel: String get() = Format.companyCount(companies.size)
+
+    /** Companies that can still be added: not already in this watchlist, matching [query] on name or ticker. */
+    fun candidates(all: List<Company>, query: String = ""): List<Company> {
+        val present = companies.map { it.id }.toSet()
+        val needle = query.trim()
+        return all.filter { it.id !in present }.filter {
+            needle.isEmpty() || it.name.contains(needle, ignoreCase = true) || it.ticker.contains(needle, ignoreCase = true)
+        }
+    }
+
+    fun addedMessage(company: Company): String = "${company.name} added to $name."
+    fun removedMessage(company: Company): String = "${company.name} removed from $name."
+    fun removeLabel(company: Company): String = "Remove ${company.name} from $name"
 }
 
 @Serializable
@@ -98,6 +111,8 @@ data class AlertRequest(
 @Serializable data class IndicesResponse(val indices: List<MarketIndex>)
 @Serializable data class CompaniesResponse(val companies: List<Company>)
 @Serializable data class WatchlistsResponse(val watchlists: List<Watchlist>)
+@Serializable data class WatchlistResponse(val watchlist: Watchlist)
+@Serializable data class WatchlistCompanyRequest(val companyId: String)
 @Serializable data class RatingActionsResponse(val ratingActions: List<RatingAction>)
 @Serializable data class AlertsResponse(val alerts: List<Alert>)
 @Serializable data class AlertResponse(val alert: Alert)

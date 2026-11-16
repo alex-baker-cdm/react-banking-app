@@ -94,3 +94,25 @@ export async function createAlert(body: AlertRequest): Promise<Alert> {
 export async function removeAlert(id: string): Promise<void> {
   await request<null>(`/api/alerts/${id}`, { method: 'DELETE' });
 }
+
+export async function addWatchlistCompany(
+  watchlistId: string,
+  companyId: string
+): Promise<Watchlist> {
+  const data = await request<{ watchlist: Watchlist }>(`/api/watchlists/${watchlistId}/companies`, {
+    method: 'POST',
+    body: JSON.stringify({ companyId }),
+  });
+  return data.watchlist;
+}
+
+export async function removeWatchlistCompany(
+  watchlistId: string,
+  companyId: string
+): Promise<Watchlist> {
+  const data = await request<{ watchlist: Watchlist }>(
+    `/api/watchlists/${watchlistId}/companies/${companyId}`,
+    { method: 'DELETE' }
+  );
+  return data.watchlist;
+}

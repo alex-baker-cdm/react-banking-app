@@ -48,6 +48,18 @@ struct ApiClient {
         try await send(WatchlistsResponse.self, makeRequest(path: "/api/watchlists")).watchlists
     }
 
+    func addCompany(_ companyId: String, toWatchlist watchlistId: String) async throws -> Watchlist {
+        var request = makeRequest(path: "/api/watchlists/\(watchlistId)/companies", method: "POST")
+        request.setValue("application/json", forHTTPHeaderField: "content-type")
+        request.httpBody = try JSONEncoder().encode(WatchlistCompanyRequest(companyId: companyId))
+        return try await send(WatchlistResponse.self, request).watchlist
+    }
+
+    func removeCompany(_ companyId: String, fromWatchlist watchlistId: String) async throws -> Watchlist {
+        let request = makeRequest(path: "/api/watchlists/\(watchlistId)/companies/\(companyId)", method: "DELETE")
+        return try await send(WatchlistResponse.self, request).watchlist
+    }
+
     func ratingActions(companyId: String) async throws -> [RatingAction] {
         try await send(RatingActionsResponse.self, makeRequest(path: "/api/companies/\(companyId)/rating-actions")).ratingActions
     }

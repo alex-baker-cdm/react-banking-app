@@ -15,7 +15,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -67,36 +83,108 @@ fun WatchlistsNavHost(store: BankingStore, nav: NavHostController) {
 
 @Composable
 fun WatchlistsScreen(store: BankingStore, onOpen: (Company) -> Unit) {
-    Column(
-        Modifier.fillMaxSize().background(WfColors.surface).verticalScroll(rememberScrollState()).padding(vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-    ) {
-        Box(Modifier.padding(horizontal = 20.dp)) { ScreenTitle("Watchlists") }
+    var addingTo by remember { mutableStateOf<String?>(null) }
+    var removing by remember { mutableStateOf<Pair<String, Company>?>(null) }
 
-        val loadError = store.loadError
-        if (store.loading) {
-            Box(Modifier.fillMaxWidth().padding(40.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = WfColors.red)
+    Column(Modifier.fillMaxSize().background(WfColors.surface)) {
+        Column(
+            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            Box(Modifier.padding(horizontal = 20.dp)) { ScreenTitle("Watchlists") }
+
+            val loadError = store.loadError
+            if (store.loading) {
+                Box(Modifier.fillMaxWidth().padding(40.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = WfColors.red)
+                }
+            } else if (loadError != null) {
+                Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    ErrorBanner("We couldn't load your watchlists", loadError)
+                    OutlineButton("Retry", onClick = {
+                        store.loading = true
+                        store.refresh()
+                    })
+                }
+            } else {
+                Row(
+                    Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    store.indices.forEach { IndexTile(it) }
+                }
+                Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    store.watchlists.forEach { watchlist ->
+                        WatchlistSection(
+                            watchlist,
+                            onOpen = onOpen,
+                            onAdd = { addingTo = watchlist.id },
+                            onRemove = { removing = watchlist.id to it },
+                        )
+                    }
+                }
+                Footer()
             }
-        } else if (loadError != null) {
-            Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                ErrorBanner("We couldn't load your watchlists", loadError)
-                OutlineButton("Retry", onClick = {
-                    store.loading = true
-                    store.refresh()
-                })
-            }
-        } else {
-            Row(
-                Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+        }
+        WatchlistMessage(store)
+    }
+
+    store.watchlists.firstOrNull { it.id == addingTo }?.let { watchlist ->
+        AddCompanyDialog(
+            watchlist = watchlist,
+            companies = store.companies,
+            onAdd = {
+                addingTo = null
+                store.addCompany(watchlist, it)
+            },
+            onClose = { addingTo = null },
+        )
+    }
+
+    removing?.let { (watchlistId, company) ->
+        val watchlist = store.watchlists.firstOrNull { it.id == watchlistId } ?: return@let
+        AlertDialog(
+            onDismissRequest = { removing = null },
+            containerColor = Color.White,
+            title = { Text("${watchlist.removeLabel(company)}?", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = WfColors.ink) },
+            confirmButton = {
+                TextButton(onClick = {
+                    removing = null
+                    store.removeCompany(watchlist, company)
+                }) { Text("Remove", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = WfColors.negative) }
+            },
+            dismissButton = {
+                TextButton(onClick = { removing = null }) {
+                    Text("Cancel", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = WfColors.link)
+                }
+            },
+        )
+    }
+}
+
+/** Pinned above the tab bar so the result of an add/remove is visible wherever the list is scrolled to. */
+@Composable
+private fun WatchlistMessage(store: BankingStore) {
+    val status = store.watchlistStatus
+    val error = store.watchlistError
+    if (status == null && error == null) return
+    Column(Modifier.fillMaxWidth().background(Color.White)) {
+        HorizontalDivider(color = WfColors.line)
+        Row(Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                Modifier.weight(1f).semantics {
+                    liveRegion = if (error != null) LiveRegionMode.Assertive else LiveRegionMode.Polite
+                },
             ) {
-                store.indices.forEach { IndexTile(it) }
+                if (error != null) {
+                    ErrorBanner("We couldn't update your watchlist", error)
+                } else if (status != null) {
+                    Banner(BannerKind.SUCCESS, status) {}
+                }
             }
-            Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                store.watchlists.forEach { watchlist -> WatchlistSection(watchlist, onOpen) }
+            IconButton(onClick = { store.dismissWatchlistMessage() }, modifier = Modifier.size(48.dp)) {
+                Icon(Icons.Filled.Close, contentDescription = "Dismiss message", tint = WfColors.muted)
             }
-            Footer()
         }
     }
 }
@@ -113,17 +201,60 @@ private fun IndexTile(index: MarketIndex) {
 }
 
 @Composable
-private fun WatchlistSection(watchlist: Watchlist, onOpen: (Company) -> Unit) {
+private fun WatchlistSection(
+    watchlist: Watchlist,
+    onOpen: (Company) -> Unit,
+    onAdd: () -> Unit,
+    onRemove: (Company) -> Unit,
+) {
     Card {
-        SectionHeader(watchlist.name, trailing = watchlist.countLabel)
-        watchlist.companies.forEach { company -> CompanyRow(company, onClick = { onOpen(company) }) }
+        Column(Modifier.fillMaxWidth().background(WfColors.sectionHeader)) {
+            Row(
+                Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    watchlist.name,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = WfColors.ink,
+                    modifier = Modifier.weight(1f).semantics { heading() },
+                )
+                Text(watchlist.countLabel, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = WfColors.ink)
+            }
+            TextButton(
+                onClick = onAdd,
+                modifier = Modifier.padding(horizontal = 4.dp).heightIn(min = 48.dp),
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null, tint = WfColors.link, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Add company", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = WfColors.link)
+            }
+        }
+        HorizontalDivider(color = WfColors.line)
+        if (watchlist.companies.isEmpty()) {
+            Text(
+                "No companies yet. Add one to start tracking.",
+                fontSize = 15.sp,
+                color = WfColors.muted,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+        watchlist.companies.forEach { company ->
+            CompanyRow(
+                company,
+                removeLabel = watchlist.removeLabel(company),
+                onClick = { onOpen(company) },
+                onRemove = { onRemove(company) },
+            )
+        }
     }
 }
 
 @Composable
-private fun CompanyRow(company: Company, onClick: () -> Unit) {
+private fun CompanyRow(company: Company, removeLabel: String, onClick: () -> Unit, onRemove: () -> Unit) {
     Column(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.Top) {
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 4.dp), verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(company.ticker, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = WfColors.ink)
@@ -137,8 +268,85 @@ private fun CompanyRow(company: Company, onClick: () -> Unit) {
                 Text(Format.money(company.price), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = WfColors.ink)
                 ChangeText(company.changePct)
             }
+            IconButton(onClick = onRemove, modifier = Modifier.size(48.dp)) {
+                Icon(Icons.Outlined.Delete, contentDescription = removeLabel, tint = WfColors.muted)
+            }
         }
         HorizontalDivider(color = WfColors.line)
+    }
+}
+
+@Composable
+private fun AddCompanyDialog(
+    watchlist: Watchlist,
+    companies: List<Company>,
+    onAdd: (Company) -> Unit,
+    onClose: () -> Unit,
+) {
+    var query by remember { mutableStateOf("") }
+    val available = watchlist.candidates(companies)
+
+    Dialog(onDismissRequest = onClose) {
+        Card(Modifier.heightIn(max = 560.dp)) {
+            Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    "Add to ${watchlist.name}",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = WfColors.ink,
+                    modifier = Modifier.semantics { heading() },
+                )
+                if (available.isEmpty()) {
+                    Text("All companies are already in this watchlist.", fontSize = 15.sp, color = WfColors.muted)
+                } else {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        singleLine = true,
+                        placeholder = { Text("Search by name or ticker", color = WfColors.muted) },
+                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = WfColors.muted) },
+                        colors = fieldColors(),
+                        modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Search by name or ticker" },
+                    )
+                }
+            }
+            if (available.isNotEmpty()) {
+                val matches = watchlist.candidates(companies, query)
+                Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(top = 8.dp)) {
+                    if (matches.isEmpty()) {
+                        Text(
+                            "No companies match your search.",
+                            fontSize = 15.sp,
+                            color = WfColors.muted,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                        )
+                    }
+                    matches.forEach { company ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable(role = Role.Button, onClick = { onAdd(company) })
+                                .heightIn(min = 56.dp)
+                                .padding(horizontal = 20.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(company.ticker, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = WfColors.ink)
+                                Text(company.name, fontSize = 14.sp, color = WfColors.text)
+                            }
+                            RatingChip(company.rating)
+                        }
+                        HorizontalDivider(color = WfColors.line)
+                    }
+                }
+            }
+            Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = onClose, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text("Cancel", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = WfColors.link)
+                }
+            }
+        }
     }
 }
 

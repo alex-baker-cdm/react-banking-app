@@ -27,6 +27,21 @@
 "watchlists.title" = "Watchlists";
 "watchlists.load_error.title" = "We couldn't load your watchlists";
 "watchlists.indices.accessibility" = "Indices";
+"watchlists.add_company_button" = "Add company";
+"watchlists.add_company_button.accessibility" = "Add company to %@";
+"watchlists.add.title" = "Add to %@";
+"watchlists.add.search_placeholder" = "Search by name or ticker";
+"watchlists.add.all_added" = "All companies are already in this watchlist.";
+"watchlists.add.no_results" = "No companies match your search.";
+"watchlists.empty" = "No companies yet. Add one to start tracking.";
+"watchlists.remove_button.accessibility" = "Remove %@ from %@";
+"watchlists.remove.confirm_title" = "Remove %@ from %@?";
+"watchlists.remove.confirm_button" = "Remove";
+"watchlists.status.added" = "%@ added to %@.";
+"watchlists.status.removed" = "%@ removed from %@.";
+"watchlists.update_error.title" = "We couldn't update your watchlist";
+"watchlists.update_error.message" = "Something went wrong on our side. Please try again.";
+"common.cancel" = "Cancel";
 
 "company.ticker_sector" = "%@ · %@";
 "company.rating" = "Issuer credit rating";

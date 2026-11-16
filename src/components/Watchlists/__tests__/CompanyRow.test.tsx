@@ -37,4 +37,25 @@ describe('CompanyRow', () => {
     fireEvent.click(screen.getByRole('button', { name: /Apple Inc\., rated AA\+/ }));
     expect(onSelect).toHaveBeenCalledWith(apple);
   });
+
+  it('has no remove control unless onRemove is provided', () => {
+    render(<CompanyRow company={apple} />);
+    expect(screen.queryByRole('button', { name: /Remove/ })).not.toBeInTheDocument();
+  });
+
+  it('removes without opening the company profile', () => {
+    const onSelect = jest.fn();
+    const onRemove = jest.fn();
+    render(
+      <CompanyRow
+        company={apple}
+        onSelect={onSelect}
+        onRemove={onRemove}
+        removeLabel='Remove Apple Inc. from Core coverage'
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Apple Inc. from Core coverage' }));
+    expect(onRemove).toHaveBeenCalledWith(apple);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
 });
