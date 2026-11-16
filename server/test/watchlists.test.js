@@ -78,7 +78,7 @@ test('DELETE /api/watchlists/:id/companies/:companyId returns 404 for an unknown
       '/api/watchlists/wl-missing/companies/f'
     );
     assert.equal(status, 404);
-    assert.equal(body.error.code, 'NOT_FOUND');
+    assert.equal(body.error.code, 'NotFoundError');
     assert.ok(body.error.correlationId);
   } finally {
     await server.close();
