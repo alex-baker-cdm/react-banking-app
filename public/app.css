@@ -765,3 +765,17 @@ button:hover {
 .sp-picker-option .sp-rating {
   margin-left: auto;
 }
+
+/* keyboard focus */
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+.sp-dialog:focus-visible {
+  outline: 3px solid var(--sp-link);
+  outline-offset: 2px;
+}
+
+.sp-company-link:focus-visible,
+.sp-picker-option:focus-visible {
+  outline-offset: -3px;
+}
