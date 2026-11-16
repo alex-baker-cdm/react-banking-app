@@ -1,6 +1,6 @@
 # WellsBanking (iOS)
 
-SwiftUI companion to the online banking web app. Same API, same accounts, same Transfer & Pay flow.
+SwiftUI companion to the Market Intelligence web app. Same API, same watchlists, company profiles and alerts.
 
 ```bash
 brew install xcodegen          # once
