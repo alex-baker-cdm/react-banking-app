@@ -7,15 +7,12 @@ interface IProps {
 }
 
 const Layout: React.FC<IProps> = ({ children }) => (
-  <div className='wf-page'>
+  <div className='sp-page'>
     <Header />
-    <main className='container wf-main'>{children}</main>
-    <footer className='wf-footer'>
+    <main className='container sp-main'>{children}</main>
+    <footer className='sp-footer'>
       <div className='container'>
-        <p>
-          Demo environment. Not affiliated with Wells Fargo &amp; Company. Equal Housing Lender.
-          Deposit products offered by the demo bank, Member FDIC.
-        </p>
+        <p>Demo environment with illustrative data. Not affiliated with S&amp;P Global Inc.</p>
       </div>
     </footer>
   </div>

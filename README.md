@@ -1,7 +1,7 @@
-# Online Banking demo (Wells Fargo-style)
+# Market Intelligence demo (S&P Global-style)
 
-Retail online-banking web app used for Devin demos: account summary, account activity and a
-Transfer & Pay flow. React (Create React App, strict TypeScript) UI served by a small Express API,
+Market-intelligence web app used for Devin demos: watchlists with issuer credit ratings, company
+profiles with rating actions, and rating/price alerts. Illustrative data; not affiliated with S&P Global Inc. React (Create React App, strict TypeScript) UI served by a small Express API,
 deployed to AWS App Runner with a CloudWatch -> Lambda -> Devin auto-triage pipeline.
 
 ```
@@ -34,7 +34,7 @@ npx react-scripts test --watchAll=false   # React component tests (Jest + Testin
 ## Layout
 
 - `src/` - React UI. Pages in `src/pages/`, shared components in `src/components/<Name>/`, API client in `src/api/`.
-- `server/` - Express API: `routes/`, `services/transfers.js` (posting rules), `data/accounts.js` (seed data),
+- `server/` - Express API: `routes/`, `services/alerts.js` (alert rules), `data/market.js` (seed data),
   `middleware/` (correlation IDs, structured error logging). Tests in `server/test/`.
 - `infra/` - Terraform for ECR, App Runner, the alerts Lambda (`infra/lambda/alerts.py` holds the triage prompt)
   and the GitHub OIDC deploy role. `scripts/deploy.sh` builds, pushes and applies.

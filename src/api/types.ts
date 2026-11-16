@@ -1,42 +1,63 @@
-export type AccountType = 'checking' | 'savings' | 'credit' | 'loan';
+export type Outlook = 'Stable' | 'Positive' | 'Negative';
 
-export interface Account {
+export interface MarketIndex {
   id: string;
-  type: AccountType;
   name: string;
-  lastFour: string;
-  currentBalance: number;
-  availableBalance?: number;
-  availableCredit?: number;
-  creditLimit?: number;
-  minimumPaymentDue?: number;
-  nextPaymentAmount?: number;
-  paymentDueDate?: string;
-  apy?: number;
+  value: number;
+  change: number;
+  changePct: number;
 }
 
-export interface Transaction {
+export interface Company {
   id: string;
-  accountId: string;
-  postedAt: string;
-  description: string;
-  amount: number;
+  ticker: string;
+  name: string;
+  sector: string;
+  rating: string;
+  outlook: Outlook;
+  price: number;
+  change: number;
+  changePct: number;
+  marketCapBn: number;
 }
 
-export interface TransferRequest {
-  fromAccountId: string;
-  toAccountId: string;
-  amount: string;
-  memo: string;
+export interface Watchlist {
+  id: string;
+  name: string;
+  companies: Company[];
 }
 
-export interface TransferReceipt {
-  confirmationNumber: string;
-  postedAt: string;
-  amount: number;
-  memo: string;
-  from: Account;
-  to: Account;
+export interface RatingAction {
+  id: string;
+  companyId: string;
+  date: string;
+  action: string;
+  fromRating: string;
+  toRating: string;
+  outlook: Outlook;
+  summary: string;
+}
+
+export type AlertType = 'rating' | 'price';
+export type AlertDirection = 'above' | 'below';
+
+export interface AlertRequest {
+  companyId: string;
+  type: AlertType;
+  direction?: AlertDirection;
+  threshold?: string;
+  note: string;
+}
+
+export interface Alert {
+  id: string;
+  companyId: string;
+  type: AlertType;
+  direction: AlertDirection | null;
+  threshold: number | null;
+  note: string;
+  createdAt: string;
+  company: Company;
 }
 
 export interface ApiErrorBody {

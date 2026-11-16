@@ -1,35 +1,32 @@
 import { Link, NavLink } from 'react-router-dom';
 
 const Header: React.FC = () => (
-  <header className='wf-header'>
-    <div className='wf-topbar'>
+  <header className='sp-header'>
+    <div className='sp-topbar'>
       <div className='container flex flex-v-center flex-space-between'>
-        <Link to='/accounts' className='wf-wordmark no-select' aria-label='Wells Fargo home'>
-          WELLS FARGO
-        </Link>
-        <nav className='wf-topnav flex flex-v-center' aria-label='Account navigation'>
-          <span className='wf-greeting'>Good morning, Alex</span>
-          <Link to='/' className='wf-signoff'>
+        <div className='flex flex-v-center'>
+          <Link to='/watchlists' className='sp-wordmark no-select' aria-label='S&amp;P Global home'>
+            S&amp;P Global
+          </Link>
+          <span className='sp-product'>Market Intelligence</span>
+        </div>
+        <nav className='sp-topnav flex flex-v-center' aria-label='Account navigation'>
+          <span className='sp-greeting'>Alex Baker</span>
+          <Link to='/' className='sp-signoff'>
             Sign off
           </Link>
         </nav>
       </div>
     </div>
-    <div className='wf-stripe' aria-hidden='true' />
-    <nav className='wf-subnav' aria-label='Primary'>
+    <div className='sp-stripe' aria-hidden='true' />
+    <nav className='sp-subnav' aria-label='Primary'>
       <div className='container flex flex-v-center'>
-        <NavLink to='/accounts' className={({ isActive }) => (isActive ? 'active' : '')}>
-          Accounts
+        <NavLink to='/watchlists' className={({ isActive }) => (isActive ? 'active' : '')}>
+          Watchlists
         </NavLink>
-        <NavLink to='/transfer' className={({ isActive }) => (isActive ? 'active' : '')}>
-          Transfer &amp; Pay
+        <NavLink to='/alerts' className={({ isActive }) => (isActive ? 'active' : '')}>
+          Alerts
         </NavLink>
-        <a href='#plan' onClick={(event) => event.preventDefault()}>
-          Plan &amp; Learn
-        </a>
-        <a href='#security' onClick={(event) => event.preventDefault()}>
-          Security &amp; Support
-        </a>
       </div>
     </nav>
   </header>
