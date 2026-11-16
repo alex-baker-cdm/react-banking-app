@@ -28,48 +28,43 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.TextUnit
+import com.demo.banking.wells.ApiError
+import com.demo.banking.wells.Format
 import com.demo.banking.wells.WfColors
 
 @Composable
-fun AppHeader(subtitle: String = "Online Banking", onSignOff: (() -> Unit)? = null) {
-    Column(modifier = Modifier.fillMaxWidth().background(WfColors.red).statusBarsPadding()) {
+fun AppHeader(onSignOff: (() -> Unit)? = null) {
+    Column(modifier = Modifier.fillMaxWidth().background(Color.White).statusBarsPadding()) {
         Row(
             modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                "WELLS FARGO",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
-                letterSpacing = 2.sp,
-            )
+            Text("S&P Global", color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.weight(1f))
             if (onSignOff != null) {
                 TextButton(
                     onClick = onSignOff,
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f)),
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                    border = BorderStroke(1.dp, WfColors.fieldBorder),
+                    colors = ButtonDefaults.textButtonColors(contentColor = WfColors.ink),
                 ) {
                     Text("Sign off", fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 }
-            } else {
-                Text(subtitle, color = Color.White, fontSize = 13.sp)
             }
         }
-        Box(Modifier.fillMaxWidth().height(6.dp).background(WfColors.yellow))
+        Box(Modifier.fillMaxWidth().height(4.dp).background(WfColors.red))
     }
 }
 
 enum class BannerKind(val background: Color, val accent: Color) {
-    ERROR(WfColors.errorBackground, WfColors.red),
-    SUCCESS(WfColors.successBackground, WfColors.green),
+    ERROR(WfColors.errorBackground, WfColors.negative),
+    SUCCESS(WfColors.successBackground, WfColors.positive),
 }
 
 @Composable
@@ -151,10 +146,57 @@ fun SectionHeader(title: String, trailing: String? = null) {
 @Composable
 fun Footer() {
     Text(
-        "Demo environment. Not affiliated with Wells Fargo & Company.",
+        "Demo environment with illustrative data. Not affiliated with S&P Global Inc.",
         fontSize = 13.sp,
         color = WfColors.muted,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth().padding(20.dp),
+    )
+}
+
+@Composable
+fun ScreenTitle(text: String) {
+    Text(
+        text,
+        fontSize = 28.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = WfColors.ink,
+        modifier = Modifier.semantics { heading() },
+    )
+}
+
+/** Server failure panel: the message plus "Reference ID: <correlationId>" when the API supplied one. */
+@Composable
+fun ErrorBanner(heading: String, error: ApiError) {
+    Banner(BannerKind.ERROR, heading) {
+        Text(error.message, fontSize = 15.sp, color = WfColors.text)
+        if (error.isServerError && error.correlationId != null) {
+            Text("Reference ID: ${error.correlationId}", fontSize = 13.sp, color = WfColors.muted)
+        }
+    }
+}
+
+@Composable
+fun RatingChip(rating: String) {
+    Text(
+        rating,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = WfColors.ink,
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .border(1.dp, WfColors.line, RoundedCornerShape(4.dp))
+            .background(WfColors.surface)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+    )
+}
+
+@Composable
+fun ChangeText(pct: Double, fontSize: TextUnit = 13.sp) {
+    Text(
+        Format.change(pct),
+        fontSize = fontSize,
+        fontWeight = FontWeight.Medium,
+        color = if (pct < 0) WfColors.negative else WfColors.positive,
     )
 }

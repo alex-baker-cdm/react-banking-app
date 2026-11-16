@@ -1,7 +1,9 @@
 # WellsBanking (Android)
 
-Jetpack Compose companion to the online banking web app, with feature parity to `ios/WellsBanking`. Same API, same
-accounts, same Transfer & Pay flow (including the "Pay minimum due" quick action on credit card and loan accounts).
+Jetpack Compose companion to the Market Intelligence web app (S&P Global-style demo), with feature parity to
+`ios/WellsBanking`. Same API: sign in, Watchlists (index strip + watchlist sections), company profile with rating
+actions, and Alerts (create rating-change / price alerts, list and remove them). Directory, package and identifier
+names keep their original `WellsBanking` naming; only what the user sees changed.
 
 Stack: Kotlin 2.0.21, AGP 8.7.3, Gradle 8.13 (wrapper committed), Compose BOM 2024.12.01 / Material 3,
 kotlinx.serialization, OkHttp. `minSdk 26`, `compileSdk`/`targetSdk 35`. Application id `com.demo.banking.wells`.
@@ -49,5 +51,3 @@ adb wait-for-device shell 'while [ "$(getprop sys.boot_completed)" != 1 ]; do sl
 - Maven Central (`repo.maven.apache.org`) rate-limits some networks with HTTP 429; `settings.gradle.kts` lists the
   Google-hosted mirror first so dependency resolution still works.
 - Gradle 9 / newer JDKs are not compatible with AGP 8.7 - use the committed wrapper and JDK 17.
-- Transfers **to** the credit card currently return a 500 from the API (known production bug, tracked separately).
-  The app shows the error banner with the Reference ID, which is the expected behaviour.

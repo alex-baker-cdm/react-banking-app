@@ -8,59 +8,52 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-enum class Page { ACCOUNTS, TRANSFER }
+enum class Page { WATCHLISTS, ALERTS }
 
-/** Values carried from an account's "Pay minimum due" quick action into the Transfer & Pay form. */
-data class PaymentPrefill(val account: Account, val amount: Double) {
-    val note: String get() = "Prefilled from Pay minimum due on ${account.name} ...${account.lastFour}"
-}
-
-/** Transfer & Pay form state. Lives in the store so it survives tab switches. */
-class TransferFormState {
-    var fromAccountId by mutableStateOf("")
-    var toAccountId by mutableStateOf("")
-    var amount by mutableStateOf("")
-    var memo by mutableStateOf("")
-    var prefillNote by mutableStateOf<String?>(null)
+/** Alerts form state. Lives in the store so it survives tab switches. */
+class AlertFormState {
+    var companyId by mutableStateOf("")
+    var type by mutableStateOf(AlertType.RATING)
+    var direction by mutableStateOf<AlertDirection?>(null)
+    var price by mutableStateOf("")
+    var note by mutableStateOf("")
     var submitting by mutableStateOf(false)
     var fieldError by mutableStateOf<ApiError?>(null)
-    var receipt by mutableStateOf<TransferReceipt?>(null)
+    var created by mutableStateOf<Alert?>(null)
     var failure by mutableStateOf<ApiError?>(null)
-    var pendingPrefill by mutableStateOf<PaymentPrefill?>(null)
 
-    val showingBanner: Boolean get() = receipt != null || failure != null
+    fun errorFor(field: String): String? = fieldError?.takeIf { it.field == field }?.message
 
-    fun apply(prefill: PaymentPrefill) {
-        toAccountId = prefill.account.id
-        amount = Format.plainAmount(prefill.amount)
-        memo = "Minimum payment"
-        prefillNote = prefill.note
+    fun clearMessages() {
         fieldError = null
-        if (fromAccountId == prefill.account.id) fromAccountId = ""
+        created = null
+        failure = null
     }
 
     fun reset() {
-        receipt = null
-        failure = null
-        fieldError = null
-        amount = ""
-        memo = ""
-        toAccountId = ""
-        prefillNote = null
-        pendingPrefill?.let { apply(it) }
-        pendingPrefill = null
+        clearMessages()
+        companyId = ""
+        type = AlertType.RATING
+        direction = null
+        price = ""
+        note = ""
     }
 }
 
 class BankingStore(private val api: ApiClient = ApiClient.shared) : ViewModel() {
     var signedOn by mutableStateOf(false)
-    var page by mutableStateOf(Page.ACCOUNTS)
-    val accounts = mutableStateListOf<Account>()
-    var loading by mutableStateOf(true)
-    var loadError by mutableStateOf<String?>(null)
-    val transfer = TransferFormState()
+    var page by mutableStateOf(Page.WATCHLISTS)
 
-    val apiBaseUrl: String get() = api.baseUrl
+    val indices = mutableStateListOf<MarketIndex>()
+    val watchlists = mutableStateListOf<Watchlist>()
+    val companies = mutableStateListOf<Company>()
+    var loading by mutableStateOf(true)
+    var loadError by mutableStateOf<ApiError?>(null)
+
+    val alerts = mutableStateListOf<Alert>()
+    var alertsLoaded by mutableStateOf(false)
+    var alertsError by mutableStateOf<ApiError?>(null)
+    val alertForm = AlertFormState()
 
     fun refresh() {
         viewModelScope.launch { refreshNow() }
@@ -68,66 +61,99 @@ class BankingStore(private val api: ApiClient = ApiClient.shared) : ViewModel() 
 
     suspend fun refreshNow() {
         try {
-            val fresh = api.accounts()
-            accounts.clear()
-            accounts.addAll(fresh)
+            val freshIndices = api.indices()
+            val freshWatchlists = api.watchlists()
+            val freshCompanies = api.companies()
+            indices.clear(); indices.addAll(freshIndices)
+            watchlists.clear(); watchlists.addAll(freshWatchlists)
+            companies.clear(); companies.addAll(freshCompanies)
             loadError = null
-        } catch (e: ApiError) {
-            loadError = e.message
         } catch (e: Exception) {
-            loadError = e.message ?: "Something went wrong."
+            loadError = e.asApiError()
         }
         loading = false
     }
 
-    suspend fun transactions(account: Account): List<Transaction> = api.transactions(account.id)
+    fun company(id: String?): Company? =
+        companies.firstOrNull { it.id == id }
+            ?: watchlists.firstNotNullOfOrNull { list -> list.companies.firstOrNull { it.id == id } }
 
-    suspend fun transfer(request: TransferRequest): TransferReceipt {
-        val receipt = api.transfer(request)
-        refreshNow()
-        return receipt
-    }
+    suspend fun ratingActions(company: Company): List<RatingAction> = api.ratingActions(company.id)
 
-    /** Runs in viewModelScope so leaving the Transfer tab mid-flight cannot cancel a posted transfer. */
-    fun submitTransfer() {
-        val form = transfer
-        if (form.submitting) return
-        form.submitting = true
-        form.fieldError = null
+    fun refreshAlerts() {
         viewModelScope.launch {
             try {
-                val receipt = transfer(
-                    TransferRequest(form.fromAccountId, form.toAccountId, form.amount.trim(), form.memo),
-                )
-                if (signedOn) form.receipt = receipt
-            } catch (e: ApiError) {
+                val fresh = api.alerts()
+                alerts.clear(); alerts.addAll(fresh)
+                alertsError = null
+            } catch (e: Exception) {
+                alertsError = e.asApiError()
+            }
+            alertsLoaded = true
+        }
+    }
+
+    /** Company profile "Create alert": open the Alerts tab with the company preselected. */
+    fun createAlertFor(company: Company) {
+        alertForm.clearMessages()
+        alertForm.companyId = company.id
+        page = Page.ALERTS
+    }
+
+    /** Runs in viewModelScope so leaving the Alerts tab mid-flight cannot cancel a posted alert. */
+    fun submitAlert() {
+        val form = alertForm
+        if (form.submitting) return
+        form.submitting = true
+        form.clearMessages()
+        val isPrice = form.type == AlertType.PRICE
+        val request = AlertRequest(
+            companyId = form.companyId,
+            type = form.type.wire,
+            direction = if (isPrice) form.direction?.wire else null,
+            threshold = if (isPrice) form.price.trim() else null,
+            note = form.note,
+        )
+        viewModelScope.launch {
+            try {
+                val alert = api.createAlert(request)
                 if (!signedOn) return@launch
-                if (e.isServerError) form.failure = e else form.fieldError = e
+                alerts.add(0, alert)
+                form.created = alert
+                form.price = ""
+                form.note = ""
             } catch (e: Exception) {
                 if (!signedOn) return@launch
-                form.failure = ApiError(0, "UNKNOWN", e.message ?: "Something went wrong.", null, null)
+                val error = e.asApiError()
+                if (!error.isServerError && error.field != null) form.fieldError = error else form.failure = error
             } finally {
                 form.submitting = false
             }
         }
     }
 
-    fun signOff() {
-        signedOn = false
-        page = Page.ACCOUNTS
-        transfer.reset()
-        transfer.fromAccountId = ""
+    fun removeAlert(alert: Alert) {
+        viewModelScope.launch {
+            try {
+                api.deleteAlert(alert.id)
+                alerts.removeAll { it.id == alert.id }
+                if (alertForm.created?.id == alert.id) alertForm.created = null
+                alertsError = null
+            } catch (e: Exception) {
+                alertsError = e.asApiError()
+            }
+        }
     }
 
-    /** "Pay minimum due": jump to Transfer & Pay with the payment prefilled (deferred while a banner is up). */
-    fun payMinimumDue(account: Account) {
-        val amount = account.paymentDue ?: return
-        val prefill = PaymentPrefill(account, amount)
-        if (transfer.showingBanner) {
-            transfer.pendingPrefill = prefill
-        } else {
-            transfer.apply(prefill)
-        }
-        page = Page.TRANSFER
+    fun signOff() {
+        signedOn = false
+        page = Page.WATCHLISTS
+        loading = true
+        alertsLoaded = false
+        alerts.clear()
+        alertForm.reset()
     }
 }
+
+fun Exception.asApiError(): ApiError =
+    this as? ApiError ?: ApiError(0, "UNKNOWN", "Something went wrong. Please try again.", null, null)

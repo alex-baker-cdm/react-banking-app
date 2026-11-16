@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build the debug APK, install it on the running Android emulator (or connected device) and launch it.
 # The app talks to the API at $BANKING_API_BASE_URL (default http://10.0.2.2:8080 = the host machine from the
-# emulator). Start the API first from the repo root with `npm run build && npm run serve`, or point the app at the
+# emulator). Start the API first from the repo root with `npm run serve`, or point the app at the
 # hosted App Runner URL: BANKING_API_BASE_URL=https://<app-runner-host> ./run.sh
 set -euo pipefail
 cd "$(dirname "$0")"
